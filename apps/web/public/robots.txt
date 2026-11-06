@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Permitir motores de búsqueda generativos (GEO: ChatGPT, Perplexity, Gemini, Claude)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://monicabattaglia.com/sitemap.xml
+# Archivo de contexto estructurado para Inteligencias Artificiales (GEO):
+# https://monicabattaglia.com/llms.txt

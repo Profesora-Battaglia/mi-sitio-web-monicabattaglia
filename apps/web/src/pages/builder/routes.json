@@ -1,0 +1,232 @@
+[
+	{
+		"path": "/juego-interactivo-revolucion-de-mayo",
+		"componentName": "JuegoInteractivoRevolucionDeMayoPage_system_z4XcVb",
+		"importPath": "@/pages/builder/juego-interactivo-revolucion-de-mayo/JuegoInteractivoRevolucionDeMayoPage",
+		"exportName": "JuegoInteractivoRevolucionDeMayoPage",
+		"locale": "system",
+		"pageId": "z4XcVb",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/aplicaciones-interactivas",
+		"componentName": "AplicacionesInteractivasPage_system_z6m0FG",
+		"importPath": "@/pages/builder/aplicaciones-interactivas/AplicacionesInteractivasPage",
+		"exportName": "AplicacionesInteractivasPage",
+		"locale": "system",
+		"pageId": "z6m0FG",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/recursos-para-docentes",
+		"componentName": "RecursosParaDocentesPage_system_zH7SVS",
+		"importPath": "@/pages/builder/recursos-para-docentes/RecursosParaDocentesPage",
+		"exportName": "RecursosParaDocentesPage",
+		"locale": "system",
+		"pageId": "zH7SVS",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/blogchecklist-accesibilidad-materiales-educativos",
+		"componentName": "BlogchecklistAccesibilidadMaterialesEducativosPage_system_zHzneZ",
+		"importPath": "@/pages/builder/blogchecklist-accesibilidad-materiales-educativos/BlogchecklistAccesibilidadMaterialesEducativosPage",
+		"exportName": "BlogchecklistAccesibilidadMaterialesEducativosPage",
+		"locale": "system",
+		"pageId": "zHzneZ",
+		"isHome": false,
+		"pageType": "blog"
+	},
+	{
+		"path": "/politicas-de-privacidad",
+		"componentName": "PoliticasDePrivacidadPage_system_zJIEZB",
+		"importPath": "@/pages/builder/politicas-de-privacidad/PoliticasDePrivacidadPage",
+		"exportName": "PoliticasDePrivacidadPage",
+		"locale": "system",
+		"pageId": "zJIEZB",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/ia-en-el-aula-2026-acuerdos-evaluacion",
+		"componentName": "IaEnElAula2026AcuerdosEvaluacionPage_system_zKf4dd",
+		"importPath": "@/pages/builder/ia-en-el-aula-2026-acuerdos-evaluacion/IaEnElAula2026AcuerdosEvaluacionPage",
+		"exportName": "IaEnElAula2026AcuerdosEvaluacionPage",
+		"locale": "system",
+		"pageId": "zKf4dd",
+		"isHome": false,
+		"pageType": "blog"
+	},
+	{
+		"path": "/sistema-de-gestion-de-inscripciones-a-mesas-de-examen-y-actas-digitales",
+		"componentName": "SistemaDeGestionDeInscripcionesAMesasDeExamenYActasDigitalesPage_system_zUErCn",
+		"importPath": "@/pages/builder/sistema-de-gestion-de-inscripciones-a-mesas-de-examen-y-actas-digitales/SistemaDeGestionDeInscripcionesAMesasDeExamenYActasDigitalesPage",
+		"exportName": "SistemaDeGestionDeInscripcionesAMesasDeExamenYActasDigitalesPage",
+		"locale": "system",
+		"pageId": "zUErCn",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/blogcomo-crear-pdf-accesible-docentes",
+		"componentName": "BlogcomoCrearPdfAccesibleDocentesPage_system_zYPleC",
+		"importPath": "@/pages/builder/blogcomo-crear-pdf-accesible-docentes/BlogcomoCrearPdfAccesibleDocentesPage",
+		"exportName": "BlogcomoCrearPdfAccesibleDocentesPage",
+		"locale": "system",
+		"pageId": "zYPleC",
+		"isHome": false,
+		"pageType": "blog"
+	},
+	{
+		"path": "/evaluador-de-accesibilidad-de-materiales-didacticos",
+		"componentName": "EvaluadorDeAccesibilidadDeMaterialesDidacticosPage_system_zcDbjO",
+		"importPath": "@/pages/builder/evaluador-de-accesibilidad-de-materiales-didacticos/EvaluadorDeAccesibilidadDeMaterialesDidacticosPage",
+		"exportName": "EvaluadorDeAccesibilidadDeMaterialesDidacticosPage",
+		"locale": "system",
+		"pageId": "zcDbjO",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/httpsclaseiaxpressvercelapp",
+		"componentName": "HttpsclaseiaxpressvercelappPage_system_zeg05",
+		"importPath": "@/pages/builder/httpsclaseiaxpressvercelapp/HttpsclaseiaxpressvercelappPage",
+		"exportName": "HttpsclaseiaxpressvercelappPage",
+		"locale": "system",
+		"pageId": "zeg05-",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/contacto-institucional",
+		"componentName": "ContactoInstitucionalPage_system_zn4Fu3",
+		"importPath": "@/pages/builder/contacto-institucional/ContactoInstitucionalPage",
+		"exportName": "ContactoInstitucionalPage",
+		"locale": "system",
+		"pageId": "zn4Fu3",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/terminos-y-condiciones",
+		"componentName": "TerminosYCondicionesPage_system_zn5oG2",
+		"importPath": "@/pages/builder/terminos-y-condiciones/TerminosYCondicionesPage",
+		"exportName": "TerminosYCondicionesPage",
+		"locale": "system",
+		"pageId": "zn5oG2",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/pensamiento-critico-en-la-era-de-la-inteligencia-artificial-la-habilidad-que-marcara-la-diferencia",
+		"componentName": "PensamientoCriticoEnLaEraDeLaInteligenciaArtificialLaHabilidadQueMarcaraLaDiferenciaPage_system_zpwVox",
+		"importPath": "@/pages/builder/pensamiento-critico-en-la-era-de-la-inteligencia-artificial-la-habilidad-que-marcara-la-diferencia/PensamientoCriticoEnLaEraDeLaInteligenciaArtificialLaHabilidadQueMarcaraLaDiferenciaPage",
+		"exportName": "PensamientoCriticoEnLaEraDeLaInteligenciaArtificialLaHabilidadQueMarcaraLaDiferenciaPage",
+		"locale": "system",
+		"pageId": "zpwVox",
+		"isHome": false,
+		"pageType": "blog"
+	},
+	{
+		"path": "/academia",
+		"componentName": "AcademiaPage_system_zv7NaW",
+		"importPath": "@/pages/builder/academia/AcademiaPage",
+		"exportName": "AcademiaPage",
+		"locale": "system",
+		"pageId": "zv7NaW",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/infografias-y-presentaciones-accesibles",
+		"componentName": "InfografiasYPresentacionesAccesiblesPage_system_zxRCEo",
+		"importPath": "@/pages/builder/infografias-y-presentaciones-accesibles/InfografiasYPresentacionesAccesiblesPage",
+		"exportName": "InfografiasYPresentacionesAccesiblesPage",
+		"locale": "system",
+		"pageId": "zxRCEo",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/materiales-accesibles-ordenados-guia",
+		"componentName": "MaterialesAccesiblesOrdenadosGuiaPage_system_zytf_T",
+		"importPath": "@/pages/builder/materiales-accesibles-ordenados-guia/MaterialesAccesiblesOrdenadosGuiaPage",
+		"exportName": "MaterialesAccesiblesOrdenadosGuiaPage",
+		"locale": "system",
+		"pageId": "zytf-T",
+		"isHome": false,
+		"pageType": "blog"
+	},
+	{
+		"path": "/sobre-mi-materiales-educativos",
+		"componentName": "SobreMiMaterialesEducativosPage_system_ai_8TAit",
+		"importPath": "@/pages/builder/sobre-mi-materiales-educativos/SobreMiMaterialesEducativosPage",
+		"exportName": "SobreMiMaterialesEducativosPage",
+		"locale": "system",
+		"pageId": "ai-8TAit",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/portfolio-de-proyectos-educativos",
+		"componentName": "PortfolioDeProyectosEducativosPage_system_ai_E2zo9",
+		"importPath": "@/pages/builder/portfolio-de-proyectos-educativos/PortfolioDeProyectosEducativosPage",
+		"exportName": "PortfolioDeProyectosEducativosPage",
+		"locale": "system",
+		"pageId": "ai-E2zo9",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/blog-accesibilidad",
+		"componentName": "BlogAccesibilidadPage_system_ai_FpYMJ",
+		"importPath": "@/pages/builder/blog-accesibilidad/BlogAccesibilidadPage",
+		"exportName": "BlogAccesibilidadPage",
+		"locale": "system",
+		"pageId": "ai-FpYMJ",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/servicios-diseno-educativo",
+		"componentName": "ServiciosDisenoEducativoPage_system_ai_hEovS",
+		"importPath": "@/pages/builder/servicios-diseno-educativo/ServiciosDisenoEducativoPage",
+		"exportName": "ServiciosDisenoEducativoPage",
+		"locale": "system",
+		"pageId": "ai-hEovS",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/contacto-diseno-educativo",
+		"componentName": "ContactoDisenoEducativoPage_system_ai_hZ353",
+		"importPath": "@/pages/builder/contacto-diseno-educativo/ContactoDisenoEducativoPage",
+		"exportName": "ContactoDisenoEducativoPage",
+		"locale": "system",
+		"pageId": "ai-hZ353",
+		"isHome": false,
+		"pageType": "default"
+	},
+	{
+		"path": "/",
+		"componentName": "HomePage_system_ai_ykmTx",
+		"importPath": "@/pages/builder/home/HomePage",
+		"exportName": "HomePage",
+		"locale": "system",
+		"pageId": "ai-ykmTx",
+		"isHome": true,
+		"pageType": "default"
+	},
+	{
+		"path": "/:slug",
+		"componentName": "DynamicProductPage_system",
+		"importPath": "@/pages/builder/dynamic-product/DynamicProductPage",
+		"exportName": "DynamicProductPage",
+		"locale": "system",
+		"pageId": "zuuo2V",
+		"isHome": false,
+		"pageType": "ecommerce-dynamic-product"
+	}
+]
