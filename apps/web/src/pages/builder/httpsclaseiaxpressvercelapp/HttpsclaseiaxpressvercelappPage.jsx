@@ -39,14 +39,14 @@ const SOFTWARE_SCHEMA = {
 				{
 					'@type': 'Offer',
 					name: 'Plan Docente Pro',
-					price: '15000',
+					price: '20000',
 					priceCurrency: 'ARS',
 					url: 'https://app.monicabattaglia.com/planes',
 				},
 				{
 					'@type': 'Offer',
 					name: 'Plan Docente Experto',
-					price: '30000',
+					price: '40000',
 					priceCurrency: 'ARS',
 					url: 'https://app.monicabattaglia.com/planes',
 				},

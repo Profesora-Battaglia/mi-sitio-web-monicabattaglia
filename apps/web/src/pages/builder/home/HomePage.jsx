@@ -116,8 +116,8 @@ export default function HomePage() {
 									'Aplicación con IA para docentes que genera planificaciones anuales, secuencias didácticas, rúbricas por capacidades, exámenes con solucionario y adaptaciones DUA/PPI en Word y PDF.',
 								offers: [
 									{ '@type': 'Offer', name: 'Plan Inicial Gratis', price: '0', priceCurrency: 'ARS' },
-									{ '@type': 'Offer', name: 'Plan Docente Pro', price: '15000', priceCurrency: 'ARS' },
-									{ '@type': 'Offer', name: 'Plan Docente Experto', price: '30000', priceCurrency: 'ARS' },
+									{ '@type': 'Offer', name: 'Plan Docente Pro', price: '20000', priceCurrency: 'ARS' },
+									{ '@type': 'Offer', name: 'Plan Docente Experto', price: '40000', priceCurrency: 'ARS' },
 								],
 							},
 							{

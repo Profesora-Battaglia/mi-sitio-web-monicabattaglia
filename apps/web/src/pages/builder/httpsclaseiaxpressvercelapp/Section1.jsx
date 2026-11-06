@@ -37,7 +37,7 @@ const APP_FAQS = [
 	},
 	{
 		q: '¿Cómo funciona el pago con Mercado Pago y cómo se activa mi cuenta?',
-		a: 'Elegís el plan Docente Pro ($15.000/mes) o Docente Experto ($30.000/mes) y abonás de forma 100% segura en pesos argentinos mediante Mercado Pago (dinero en cuenta, débito o crédito). Podés empezar antes con el Plan Inicial gratuito de 3 generaciones sin tarjeta.',
+		a: 'Elegís el plan Docente Pro ($20.000/mes) o Docente Experto ($40.000/mes) y abonás de forma 100% segura en pesos argentinos mediante Mercado Pago (dinero en cuenta, débito o crédito). Podés empezar antes con el Plan Inicial gratuito de 3 generaciones sin tarjeta.',
 	},
 	{
 		q: '¿Qué incluye el Módulo de Inclusión (PPI y DUA)?',
