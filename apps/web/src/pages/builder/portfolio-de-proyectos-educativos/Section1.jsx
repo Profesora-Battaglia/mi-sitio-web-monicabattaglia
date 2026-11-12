@@ -22,9 +22,8 @@ const projects = [
 			'100% adaptable a cada colegio',
 		],
 		cta: { text: 'Ver proyecto y probar Demo', href: '/libro-de-temas-digital' },
-		image:
-			'https://horizons-cdn.hostinger.com/8899df02-63ad-48bb-b79f-af29dfcdaf65/dando-clases-Qvb59NOrURvU1RpV.webp?width=768&fit=crop',
-		alt: 'Libro de Temas Digital con tablero de seguimiento para dirección y carga rápida docente',
+		image: '/images/libro-de-temas-portafolio.jpg',
+		alt: 'Laptop y tablet mostrando la plataforma Libro de Temas Digital con tablero de dirección y tarjetas de cursos',
 	},
 	{
 		icon: Building2,
