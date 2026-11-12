@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, CheckSquare, Compass, ArrowRight, ExternalLink } from 'lucide-react';
+import { Sparkles, CheckSquare, Compass, BookOpen, ArrowRight, ExternalLink } from 'lucide-react';
 import Reveal from '@/components/Reveal';
 import TeacherShareBar from '@/components/TeacherShareBar';
 
@@ -16,6 +16,18 @@ const INTERACTIVE_APPS = [
 		externalCta: 'Abrir App ahora',
 		icon: Sparkles,
 		accent: 'border-[#1d7a4a]/30 bg-gradient-to-br from-[#e3f1ea] via-white to-[#e9eff5]'
+	},
+	{
+		badge: 'Gestión Institucional · Demo en Vivo',
+		title: 'Libro de Temas Digital Multi-Institución',
+		description:
+			'Plataforma para colegios secundarios e institutos: carga rápida docente, botón «Ponerse al Día» y Tablero de Dirección en tiempo real.',
+		href: '/libro-de-temas-digital',
+		externalHref: '/libro-de-temas/index.html',
+		cta: 'Ver proyecto y Demo',
+		externalCta: 'Abrir Plataforma',
+		icon: BookOpen,
+		accent: 'border-slate-200 bg-white'
 	},
 	{
 		badge: 'Herramienta Gratuita · Diagnóstico en vivo',
@@ -56,11 +68,11 @@ export default function Section2() {
 							Catálogo de Aplicaciones Interactivas
 						</h2>
 						<p className="mt-3 text-base text-slate-600">
-							Seleccioná la herramienta que querés utilizar en tu clase o en tu planificación docente:
+							Seleccioná la herramienta que querés utilizar en tu clase o en tu institución educativa:
 						</p>
 					</div>
 
-					<div className="mt-10 grid gap-6 lg:grid-cols-3">
+					<div className="mt-10 grid gap-6 lg:grid-cols-2">
 						{INTERACTIVE_APPS.map((app, idx) => {
 							const IconComp = app.icon;
 							return (

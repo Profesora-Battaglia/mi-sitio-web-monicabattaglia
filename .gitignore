@@ -7,6 +7,8 @@ dist/
 .env
 .env.*
 !.env.example
+**/.env
+**/config.local.js
 
 # Archivos temporales y de exportación
 *.zip

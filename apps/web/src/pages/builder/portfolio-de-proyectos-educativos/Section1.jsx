@@ -1,12 +1,34 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, Smartphone, FileText, Gamepad2, Check } from 'lucide-react';
+import { ArrowRight, Building2, BookOpen, Smartphone, FileText, Gamepad2, Check } from 'lucide-react';
 import Reveal from '@/components/Reveal';
 
 const projects = [
 	{
+		icon: BookOpen,
+		title: 'Libro de Temas Digital (Multi-Institución)',
+		description:
+			'Plataforma en la nube para escuelas secundarias e institutos donde cada docente registra sus clases en segundos y el Equipo Directivo supervisa el estado de carga en tiempo real.',
+		features: [
+			'Carga rápida y función «Ponerse al Día»',
+			'Tablero de Dirección con semáforo por año',
+			'Acceso seguro por rol (Docente / Dirección)',
+			'Exportación directa a Excel / CSV',
+		],
+		impact: [
+			'Fin de las planillas lentas o sobrescritas',
+			'Seguimiento pedagógico al instante',
+			'Gestión ágil de titulares y suplentes',
+			'100% adaptable a cada colegio',
+		],
+		cta: { text: 'Ver proyecto y probar Demo', href: '/libro-de-temas-digital' },
+		image:
+			'https://horizons-cdn.hostinger.com/8899df02-63ad-48bb-b79f-af29dfcdaf65/dando-clases-Qvb59NOrURvU1RpV.webp?width=768&fit=crop',
+		alt: 'Libro de Temas Digital con tablero de seguimiento para dirección y carga rápida docente',
+	},
+	{
 		icon: Building2,
-		title: 'Digitalización Institucional',
+		title: 'Digitalización Institucional (Mesas y Actas)',
 		description:
 			'Transformación completa del sistema de inscripción a cursado y mesas de exámenes mediante formularios digitales y automatización de actas.',
 		features: [
@@ -21,7 +43,7 @@ const projects = [
 			'Estudiantes más autónomos',
 			'Proceso sostenible y escalable',
 		],
-		cta: { text: 'Ver proyecto', href: '/sistema-de-gestion-de-inscripciones-a-mesas-de-examen-y-actas-digitales' },
+		cta: { text: 'Ver proyecto y probar Demo', href: '/sistema-de-gestion-de-inscripciones-a-mesas-de-examen-y-actas-digitales' },
 		image:
 			'https://horizons-cdn.hostinger.com/8899df02-63ad-48bb-b79f-af29dfcdaf65/gemini_generated_image_ctk7ductk7ductk7-convertido-de-png-Rk1mxC9VSBzQvZXf.webp?width=768&fit=crop',
 		alt: 'Formulario digital de inscripción académica con opciones de cursado y mesas de examen',
