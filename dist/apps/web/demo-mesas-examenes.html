@@ -1,0 +1,2491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Gestión de Mesas de Exámenes y Actas Volantes — Demo Interactiva | Mónica Battaglia</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-navy: #192b4d;
+      --brand-blue: #1e3a8a;
+      --brand-emerald: #10b981;
+      --brand-emerald-dark: #0fa37f;
+    }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    h1, h2, .font-heading {
+      font-family: 'Poppins', 'Inter', sans-serif;
+    }
+    .acta-paper {
+      background: #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+    .acta-table th,
+    .acta-table td {
+      border: 1px solid #1e293b;
+    }
+    /* Estilos de impresión en hoja A4 vertical */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm 12mm;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      /* Si estamos imprimiendo un comprobante individual */
+      body.printing-comprobante #appMainContainer {
+        display: none !important;
+      }
+      body.printing-comprobante #printComprobanteArea {
+        display: block !important;
+      }
+      /* Si estamos imprimiendo el Acta Volante A4 */
+      body:not(.printing-comprobante) #printComprobanteArea {
+        display: none !important;
+      }
+      body:not(.printing-comprobante) .tab-panel:not(#tab-actas) {
+        display: none !important;
+      }
+      body:not(.printing-comprobante) #tab-actas {
+        display: block !important;
+      }
+      .acta-paper {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .acta-input {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        font-weight: 600 !important;
+        color: #000000 !important;
+      }
+      .acta-input::placeholder {
+        color: transparent !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ÁREA EXCLUSIVA PARA IMPRESIÓN DE COMPROBANTE INDIVIDUAL -->
+  <div id="printComprobanteArea" class="hidden p-8 max-w-xl mx-auto border-2 border-gray-800 rounded-xl bg-white"></div>
+
+  <div id="appMainContainer" class="flex-1 flex flex-col">
+    <!-- BARRA COMERCIAL DE DEMO INTERACTIVA (Oculta al imprimir) -->
+    <div id="demoBanner" class="no-print bg-[#12213d] text-white border-b border-emerald-500/30 px-3 sm:px-6 py-2.5 text-xs">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <!-- Selector de perfil de institución -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-400/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            DEMO INTERACTIVA
+          </span>
+          <span class="text-slate-300 hidden md:inline">Probá cómo se adapta a cada nivel:</span>
+          <div class="inline-flex rounded-lg bg-slate-800/90 p-0.5 border border-slate-700">
+            <button type="button" id="btnPresetIES" class="px-3 py-1 rounded-md font-semibold transition-all bg-emerald-500 text-slate-950 shadow-sm">
+              🏛️ Ejemplo IES / Superior
+            </button>
+            <button type="button" id="btnPresetUni" class="px-3 py-1 rounded-md font-semibold transition-all text-slate-300 hover:text-white">
+              🎓 Ejemplo Universidad / Facultad
+            </button>
+          </div>
+        </div>
+
+        <!-- Acciones rápidas para el visitante / comprador -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnQuickAdminDemo" class="px-3 py-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/40 font-semibold transition flex items-center gap-1.5">
+            <span>🔓</span>
+            <span id="lblQuickAdminDemo">Probar Vista Preceptoría / Actas (1 clic)</span>
+          </button>
+          <button type="button" id="btnCustomizeDemo" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-medium transition hidden sm:inline-flex items-center gap-1">
+            <span>⚙️</span>
+            <span>Personalizar Membrete</span>
+          </button>
+          <a href="https://wa.me/5492622662596?text=Hola%20M%C3%B3nica%2C%20prob%C3%A9%20la%20Demo%20del%20Sistema%20de%20Mesas%20de%20Ex%C3%A1menes%20y%20Actas%20Volantes%20en%20tu%20web%20y%20quiero%20consultar%20para%20implementarlo%20en%20nuestra%20instituci%C3%B3n." target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-[#10b981] hover:bg-[#0fa37f] text-slate-950 font-bold transition flex items-center gap-1.5 shadow-sm">
+            <span>💬 Quiero este sistema en mi Institución</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- CABECERA INSTITUCIONAL PRINCIPAL -->
+    <header class="no-print bg-gradient-to-r from-[#192b4d] via-[#1e3a8a] to-[#192b4d] text-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-wrap items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="hdrJurisdiccion" class="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded bg-white/10 text-emerald-300 border border-white/15">
+              DIRECCIÓN GENERAL DE ESCUELAS · MENDOZA
+            </span>
+            <span id="hdrTipoBadge" class="text-[11px] font-medium px-2 py-0.5 rounded bg-blue-950/60 text-blue-200 border border-blue-400/20">
+              Nivel Superior (IES)
+            </span>
+          </div>
+          <h1 id="hdrInstitucion" class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            IES N° 9-009 “Tupungato”
+          </h1>
+          <p class="text-xs sm:text-sm text-blue-100">
+            Gestión de Mesas de Exámenes y Actas Volantes — <strong id="hdrTurno" class="text-emerald-300 font-semibold">NOVIEMBRE - DICIEMBRE 2026</strong>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span id="roleStatusBadge" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 text-blue-100 border border-white/15">
+            👤 Modo Estudiante
+          </span>
+          <button type="button" id="btnToggleAdminModal" class="px-4 py-2 rounded-lg bg-white text-[#192b4d] hover:bg-blue-50 text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-2">
+            <span>🔐</span>
+            <span id="btnAdminLabel">Acceso Preceptoría</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE NAVEGACIÓN DE PESTAÑAS -->
+      <div class="bg-[#12213d]/80 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+          <nav class="flex flex-wrap gap-1 py-1.5" aria-label="Navegación del sistema">
+            <button type="button" data-tab="inscripcion" class="tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition bg-emerald-500 text-slate-950 shadow-sm">
+              1. Formulario de Inscripción
+            </button>
+            <button type="button" data-tab="base" id="navBtnBase" class="tab-btn hidden px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-blue-100 hover:bg-white/10 flex items-center gap-1.5">
+              <span>2. Base y Correlativas</span>
+              <span id="badgeTotalInscriptos" class="px-1.5 py-0.5 text-[10px] rounded-full bg-blue-900 text-blue-100 font-bold">0</span>
+            </button>
+            <button type="button" data-tab="actas" id="navBtnActas" class="tab-btn hidden px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-blue-100 hover:bg-white/10 flex items-center gap-1.5">
+              <span>3. Actas Volantes (A4)</span>
+              <span id="badgeTotalActas" class="px-1.5 py-0.5 text-[10px] rounded-full bg-emerald-700 text-white font-bold">0</span>
+            </button>
+            <button type="button" data-tab="config" id="navBtnConfig" class="tab-btn hidden px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-blue-100 hover:bg-white/10">
+              4. Configuración Institucional
+            </button>
+          </nav>
+
+          <div id="adminHintBar" class="text-[11px] text-amber-300/90 py-1 hidden sm:block">
+            💡 En esta Demo podés entrar a <strong id="hintAreaName">Preceptoría</strong> con clave <strong>1234</strong> (o desde el botón amarillo superior).
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+
+      <!-- ========================================================= -->
+      <!-- PESTAÑA 1: FORMULARIO DE INSCRIPCIÓN (ESTUDIANTES)        -->
+      <!-- ========================================================= -->
+      <section id="tab-inscripcion" class="tab-panel space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Columna Principal: Formulario -->
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7">
+            <div class="border-b border-slate-100 pb-4 mb-5">
+              <h2 class="text-lg sm:text-xl font-bold text-slate-900">Formulario de Inscripción a Mesas de Examen</h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Completá los datos del estudiante. La inscripción se deriva automáticamente a la Base General y al Acta Volante oficial.
+              </p>
+            </div>
+
+            <form id="formInscripcion" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Carrera -->
+                <div class="sm:col-span-2">
+                  <label for="inpCarrera" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Carrera / Plan de Estudios *
+                  </label>
+                  <select id="inpCarrera" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                  </select>
+                </div>
+
+                <!-- Año de la materia -->
+                <div>
+                  <label for="inpAnio" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    ¿De qué año es la materia? *
+                  </label>
+                  <select id="inpAnio" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                  </select>
+                </div>
+
+                <!-- Condición -->
+                <div>
+                  <label for="inpCondicion" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Condición de Examen *
+                  </label>
+                  <select id="inpCondicion" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                  </select>
+                </div>
+
+                <!-- Espacio Curricular / Materia -->
+                <div class="sm:col-span-2">
+                  <label for="inpMateria" id="lblEspacioCurricular" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Espacio Curricular / Materia que desea rendir *
+                  </label>
+                  <select id="inpMateria" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                  </select>
+                  <div class="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-blue-50/80 border border-blue-200 px-3.5 py-2 text-xs text-blue-950">
+                    <span>📅 Fecha de mesa asignada: <strong id="previewFechaMesa" class="font-bold text-[#1e3a8a]">--/--/----</strong></span>
+                    <span id="wrapLlamadoInfo" class="hidden font-semibold text-emerald-800"></span>
+                  </div>
+                </div>
+
+                <!-- Selector opcional de Llamado (Universidades / IES con 2 llamados) -->
+                <div id="fieldWrapLlamado" class="sm:col-span-2 hidden">
+                  <label for="inpLlamado" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Llamado al que se presenta *
+                  </label>
+                  <select id="inpLlamado" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                    <option value="1° LLAMADO">1° LLAMADO</option>
+                    <option value="2° LLAMADO">2° LLAMADO</option>
+                  </select>
+                </div>
+
+                <!-- Apellido y Nombre -->
+                <div class="sm:col-span-2">
+                  <label for="inpNombre" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Apellido y Nombres (en mayúscula) *
+                  </label>
+                  <input id="inpNombre" type="text" required placeholder="Ej: GUZMAN LUCIANO" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+                </div>
+
+                <!-- DNI -->
+                <div>
+                  <label for="inpDni" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    D.N.I. (sin puntos) *
+                  </label>
+                  <input id="inpDni" type="text" inputmode="numeric" required placeholder="Ej: 44438232" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+                </div>
+
+                <!-- Legajo (Opcional, activable para Universidades) -->
+                <div id="fieldWrapLegajo" class="hidden">
+                  <label for="inpLegajo" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    N° de Legajo / Matrícula *
+                  </label>
+                  <input id="inpLegajo" type="text" placeholder="Ej: 28450/2" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+                </div>
+
+                <!-- Fecha de Regularidad -->
+                <div>
+                  <label for="inpRegularidad" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Fecha / Ciclo de Regularidad (mes/año)
+                  </label>
+                  <input id="inpRegularidad" type="text" placeholder="Ej: 11/2025" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+                </div>
+
+                <!-- Email -->
+                <div class="sm:col-span-2">
+                  <label for="inpEmail" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                    Dirección de correo electrónico *
+                  </label>
+                  <input id="inpEmail" type="email" required placeholder="estudiante@ejemplo.edu.ar" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+                </div>
+
+                <!-- Estado de Correlativas (Visible solo si está logueado Preceptoría/Bedelía) -->
+                <div id="wrapAdminCorrelativaForm" class="sm:col-span-2 hidden rounded-xl bg-amber-50 border border-amber-200 p-3.5">
+                  <label for="inpCorrelativa" class="block text-xs font-bold text-amber-900 uppercase mb-1">
+                    Carga directa por <span class="lblAreaAdminInline">Preceptoría</span> — ¿Tiene correlativas aprobadas?
+                  </label>
+                  <select id="inpCorrelativa" class="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800">
+                    <option value="Pendiente">⏳ Pendiente de verificación</option>
+                    <option value="Si" selected>✅ Sí (Habilitado — Pasa directo al Acta Volante)</option>
+                    <option value="No">❌ No (Inhabilitado por correlativas)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                <p id="formPrivacyNote" class="text-xs text-slate-500">
+                  🔒 Tus datos se registran para <span class="lblAreaAdminInline font-medium">Preceptoría</span> y control de actas.
+                </p>
+                <div class="flex items-center gap-2.5">
+                  <button type="reset" id="btnLimpiarForm" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+                    Limpiar
+                  </button>
+                  <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#1e3a8a] hover:bg-[#192b4d] text-white text-xs sm:text-sm font-bold shadow-sm transition">
+                    Registrar Inscripción
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Columna Lateral: Flujo + Comprobantes -->
+          <div class="space-y-5">
+            <!-- Tarjeta Flujo del Sistema -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2 mb-3">
+                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-bold">✓</span>
+                <span>Circuito Automatizado</span>
+              </h3>
+              <ul class="space-y-2.5 text-xs text-slate-600">
+                <li class="flex gap-2">
+                  <span class="font-bold text-[#1e3a8a]">1·</span>
+                  <span><strong>Inscripción Online:</strong> El estudiante selecciona carrera, año, condición y materia con fecha asignada automáticamente.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="font-bold text-[#1e3a8a]">2·</span>
+                  <span><strong>Filtro de Correlativas:</strong> <span class="lblAreaAdminInline">Preceptoría</span> valida correlativas (<em>Sí / No / Pendiente</em>). Solo los habilitados pasan al Acta.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="font-bold text-[#1e3a8a]">3·</span>
+                  <span><strong>Acta Volante A4:</strong> Se genera el acta oficial con membrete de la institución, lista para cargar notas e imprimir.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Tarjeta Mis Comprobantes -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <h3 id="sideComprobantesTitle" class="text-sm font-bold text-slate-900">
+                  Mis Comprobantes Emitidos
+                </h3>
+                <button type="button" id="btnVerTodasEnBase" class="hidden text-xs font-semibold text-[#1e3a8a] hover:underline">
+                  Ir a Base General →
+                </button>
+              </div>
+              <div id="ultimasInscripcionesList" class="space-y-3 text-xs text-slate-600">
+                <!-- Renderizado por JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- PESTAÑA 2: BASE GENERAL DE INSCRIPTOS Y CORRELATIVAS      -->
+      <!-- ========================================================= -->
+      <section id="tab-base" class="tab-panel hidden space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Base General de Inscripciones y Control de Correlativas</h2>
+              <p class="text-xs text-slate-500">
+                Verificá si el estudiante cumple con el régimen de correlatividades. <strong>Solo quienes tienen Correlativa = "Sí" integran el Acta Volante.</strong>
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" id="btnHabilitarTodosPendientes" class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition">
+                ✓ Habilitar todos los Pendientes
+              </button>
+              <button type="button" id="btnExportarBaseCsv" class="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+                📥 Exportar Base (.csv)
+              </button>
+            </div>
+          </div>
+
+          <!-- Resumen rápido -->
+          <div id="baseSummaryPills" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4"></div>
+
+          <!-- Filtros -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+            <input id="fltSearch" type="text" placeholder="Buscar apellido, DNI o legajo..." class="rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+            <select id="fltCarrera" class="rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+              <option value="">Todas las carreras</option>
+            </select>
+            <select id="fltAnio" class="rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+              <option value="">Todos los años</option>
+            </select>
+            <select id="fltCondicion" class="rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+              <option value="">Todas las condiciones</option>
+            </select>
+            <select id="fltCorrelativa" class="rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+              <option value="">Correlativas: Todas</option>
+              <option value="Si">✅ Habilitados (Sí)</option>
+              <option value="Pendiente">⏳ Pendientes</option>
+              <option value="No">❌ No habilitados (No)</option>
+            </select>
+          </div>
+
+          <!-- Tabla -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 font-bold uppercase text-[11px]">
+                  <th class="py-2.5 px-3">Estudiante</th>
+                  <th class="py-2.5 px-3">DNI / Legajo</th>
+                  <th class="py-2.5 px-3">Carrera</th>
+                  <th class="py-2.5 px-3">Año / Condición</th>
+                  <th class="py-2.5 px-3">Espacio Curricular / Fecha</th>
+                  <th class="py-2.5 px-3 text-center">Regularidad</th>
+                  <th class="py-2.5 px-3 text-center">Correlativas (Pase al Acta)</th>
+                  <th class="py-2.5 px-3 text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="baseTableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- PESTAÑA 3: ACTAS VOLANTES OFICIALES E IMPRESIÓN A4        -->
+      <!-- ========================================================= -->
+      <section id="tab-actas" class="tab-panel hidden space-y-5">
+        <!-- Barra de Controles (no se imprime) -->
+        <div class="no-print bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Generador de Actas Volantes Oficiales</h2>
+              <p class="text-xs text-slate-500">
+                Seleccioná la mesa para completar Libro, Folio, Tribunal Examinador, cargar calificaciones y emitir el Acta en hoja A4.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" id="btnExportarActaCsv" class="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition">
+                📥 Descargar Acta (.csv)
+              </button>
+              <button type="button" id="btnImprimirActa" class="px-4 py-2 rounded-xl bg-[#1e3a8a] hover:bg-[#192b4d] text-white text-xs font-bold shadow-sm flex items-center gap-1.5 transition">
+                <span>🖨️</span>
+                <span>Imprimir Acta Oficial (A4)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-3 items-end">
+            <div class="lg:col-span-2">
+              <label for="selActaMesa" class="block text-xs font-bold text-slate-700 mb-1">
+                Mesa / Acta Disponible (con estudiantes habilitados)
+              </label>
+              <select id="selActaMesa" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"></select>
+            </div>
+            <div>
+              <label for="inpLibro" class="block text-xs font-bold text-slate-700 mb-1">Libro Matriz N°</label>
+              <input id="inpLibro" type="text" placeholder="Ej: 14" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+            </div>
+            <div>
+              <label for="inpFolio" class="block text-xs font-bold text-slate-700 mb-1">Folio N°</label>
+              <input id="inpFolio" type="text" placeholder="Ej: 082" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+            </div>
+          </div>
+
+          <!-- Tribunal Examinador opcional -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+            <div>
+              <label for="inpPresidente" class="block text-[11px] font-semibold text-slate-600 mb-1">Presidente de Mesa (Opcional)</label>
+              <input id="inpPresidente" type="text" placeholder="Prof. / Mgtr. / Dr..." class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+            </div>
+            <div>
+              <label for="inpVocal1" class="block text-[11px] font-semibold text-slate-600 mb-1">Vocal 1° (Opcional)</label>
+              <input id="inpVocal1" type="text" placeholder="Nombre y Apellido..." class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+            </div>
+            <div>
+              <label for="inpVocal2" class="block text-[11px] font-semibold text-slate-600 mb-1">Vocal 2° (Opcional)</label>
+              <input id="inpVocal2" type="text" placeholder="Nombre y Apellido..." class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
+            <label class="inline-flex items-center gap-2 text-slate-700 cursor-pointer font-medium">
+              <input id="chkRellenarRenglones" type="checkbox" checked class="rounded border-slate-300 text-[#1e3a8a] focus:ring-[#1e3a8a]" />
+              <span id="lblChkRenglones">Completar hasta 25 renglones reglamentarios para impresión</span>
+            </label>
+            <div id="actaStatsBar" class="flex flex-wrap items-center gap-3 font-semibold"></div>
+          </div>
+        </div>
+
+        <!-- Hoja A4 Imprimible del Acta Volante -->
+        <div id="actaPrintable" class="acta-paper rounded-2xl border border-slate-200 p-6 sm:p-8 max-w-4xl mx-auto">
+          <!-- Renderizado dinámicamente por JS -->
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- PESTAÑA 4: CONFIGURACIÓN MULTI-INSTITUCIÓN (IES / UNI)    -->
+      <!-- ========================================================= -->
+      <section id="tab-config" class="tab-panel hidden space-y-6">
+        <!-- Bloque 1: Identidad Institucional y Parámetros Académicos -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Multi-Institución (IES y Universidades)
+              </span>
+              <h2 class="text-lg font-bold text-slate-900 mt-1">Identidad Institucional y Reglamentación del Acta</h2>
+              <p class="text-xs text-slate-500">
+                Personalizá los datos de la institución. Los cambios impactan al instante en el formulario, comprobantes y membrete del Acta Volante A4.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="btnConfigPresetIES" class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                Cargar plantilla IES
+              </button>
+              <button type="button" id="btnConfigPresetUni" class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                Cargar plantilla Universidad
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="cfgTipoInstitucion" class="block text-xs font-bold text-slate-700 mb-1">Tipo de Institución</label>
+              <select id="cfgTipoInstitucion" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white font-medium">
+                <option value="IES">Instituto de Educación Superior (IES / Terciario)</option>
+                <option value="UNIVERSIDAD">Universidad / Facultad Universitaria</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="cfgInstitucionNombre" class="block text-xs font-bold text-slate-700 mb-1">Nombre Oficial de la Institución / Facultad</label>
+              <input id="cfgInstitucionNombre" type="text" placeholder="Ej: INSTITUTO DE EDUCACIÓN SUPERIOR N° 9-009 “TUPUNGATO”" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="cfgJurisdiccion" class="block text-xs font-bold text-slate-700 mb-1">Organismo Superior / Ministerio / Universidad (Membrete)</label>
+              <input id="cfgJurisdiccion" type="text" placeholder="Ej: DIRECCIÓN GENERAL DE ESCUELAS - GOBIERNO DE MENDOZA" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+
+            <div>
+              <label for="cfgLocalidad" class="block text-xs font-bold text-slate-700 mb-1">Localidad y Provincia (Pie de Acta)</label>
+              <input id="cfgLocalidad" type="text" placeholder="Ej: Tupungato, Mendoza" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+
+            <div>
+              <label for="cfgTurno" class="block text-xs font-bold text-slate-700 mb-1">Turno / Período de Exámenes</label>
+              <input id="cfgTurno" type="text" placeholder="Ej: NOVIEMBRE - DICIEMBRE 2026" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase font-semibold" />
+            </div>
+
+            <div>
+              <label for="cfgAreaAdmin" class="block text-xs font-bold text-slate-700 mb-1">Denominación del Área de Control</label>
+              <select id="cfgAreaAdmin" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white">
+                <option value="Preceptoría">Preceptoría (Clásico IES)</option>
+                <option value="Bedelía / Depto. Alumnos">Bedelía / Depto. Alumnos (Universidad)</option>
+                <option value="Secretaría Académica">Secretaría Académica</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="cfgRenglonesActa" class="block text-xs font-bold text-slate-700 mb-1">Renglones por Acta Volante</label>
+              <input id="cfgRenglonesActa" type="number" min="10" max="50" value="25" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+
+            <!-- Switches de campos universitarios -->
+            <div class="sm:col-span-2 lg:col-span-3 pt-2 flex flex-wrap items-center gap-6 text-xs">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                <input id="cfgRequiereLegajo" type="checkbox" class="rounded border-slate-300 text-[#1e3a8a]" />
+                <span>Pedir <strong>N° de Legajo / Matrícula</strong> en la inscripción e imprimirlo en el Acta</span>
+              </label>
+
+              <label class="inline-flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                <input id="cfgUsaLlamados" type="checkbox" class="rounded border-slate-300 text-[#1e3a8a]" />
+                <span>Permitir elegir <strong>1° Llamado / 2° Llamado</strong> en el formulario</span>
+              </label>
+
+              <label class="inline-flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                <input id="cfgIncluyePromocional" type="checkbox" class="rounded border-slate-300 text-[#1e3a8a]" />
+                <span>Habilitar condición <strong>PROMOCIONAL / COLOQUIO</strong></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <label for="cfgPin" class="text-xs font-bold text-slate-700">Clave de Acceso Administrativo:</label>
+              <input id="cfgPin" type="text" class="w-28 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-mono" />
+            </div>
+            <button type="button" id="btnGuardarInstitucion" class="px-5 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#0fa37f] text-slate-950 text-xs font-bold shadow-sm transition">
+              💾 Guardar Configuración Institucional
+            </button>
+          </div>
+        </div>
+
+        <!-- Bloque 2: Gestión de Carreras, Años y Fechas de Mesas -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <h3 class="text-sm font-bold text-slate-900">Agregar Nueva Carrera</h3>
+            <div>
+              <label for="inpNuevaCarrera" class="block text-xs font-semibold text-slate-700 mb-1">Nombre de la Carrera / Plan</label>
+              <input id="inpNuevaCarrera" type="text" placeholder="Ej: TECNICATURA SUPERIOR EN ENOLOGÍA" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
+            </div>
+            <button type="button" id="btnAgregarCarrera" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition">
+              + Añadir Carrera al Catálogo
+            </button>
+
+            <hr class="border-slate-200" />
+
+            <h3 class="text-sm font-bold text-slate-900">Agregar Materia / Mesa de Examen</h3>
+            <div class="space-y-3">
+              <div>
+                <label for="cfgMatCarrera" class="block text-xs font-semibold text-slate-700 mb-1">Carrera</label>
+                <select id="cfgMatCarrera" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white"></select>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label for="cfgMatAnio" class="block text-xs font-semibold text-slate-700 mb-1">Año de cursado</label>
+                  <select id="cfgMatAnio" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white">
+                    <option value="1° AÑO">1° AÑO</option>
+                    <option value="2° AÑO">2° AÑO</option>
+                    <option value="3° AÑO">3° AÑO</option>
+                    <option value="4° AÑO">4° AÑO</option>
+                    <option value="5° AÑO">5° AÑO</option>
+                    <option value="6° AÑO">6° AÑO</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="cfgMatFecha" class="block text-xs font-semibold text-slate-700 mb-1">Fecha de Mesa</label>
+                  <input id="cfgMatFecha" type="text" placeholder="DD/MM/AAAA" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+                </div>
+              </div>
+              <div>
+                <label for="cfgMatNombre" class="block text-xs font-semibold text-slate-700 mb-1">Espacio Curricular / Cátedra</label>
+                <input id="cfgMatNombre" type="text" placeholder="Ej: ANÁLISIS MATEMÁTICO I" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+              <button type="button" id="btnAgregarMateria" class="w-full py-2 rounded-xl bg-[#1e3a8a] hover:bg-[#192b4d] text-white text-xs font-semibold transition">
+                + Guardar Materia y Fecha
+              </button>
+            </div>
+
+            <hr class="border-slate-200" />
+
+            <div class="space-y-2">
+              <h3 class="text-xs font-bold text-slate-700 uppercase">Respaldo y Restauración</h3>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" id="btnExportJson" class="flex-1 py-2 px-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                  Exportar Backup (.json)
+                </button>
+                <button type="button" id="btnResetDemo" class="py-2 px-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-xs font-semibold text-red-700">
+                  Restaurar Datos Demo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Cronograma de Mesas y Fechas por Carrera</h3>
+                <p class="text-xs text-slate-500">Editá las fechas directamente o eliminá materias que no se rindan en este turno.</p>
+              </div>
+              <select id="cfgFilterCarrera" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white"></select>
+            </div>
+            <div id="cfgMateriasContainer" class="space-y-2 max-h-[520px] overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- PIE DE PÁGINA COMERCIAL -->
+    <footer class="no-print bg-white border-t border-slate-200 mt-10 py-5 px-4 sm:px-6 text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="font-semibold text-slate-800">
+            Sistema de Gestión de Mesas de Exámenes y Actas Volantes Oficiales (IES & Universidades)
+          </p>
+          <p class="mt-0.5">
+            Desarrollado por <a href="https://monicabattaglia.com" target="_blank" rel="noopener noreferrer" class="text-[#1e3a8a] font-semibold hover:underline">Mónica Battaglia</a> · Innovación Pedagógica y Digitalización Educativa
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="mailto:meb@monicabattaglia.com" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 font-medium text-slate-700">
+            ✉️ meb@monicabattaglia.com
+          </a>
+          <a href="https://wa.me/5492622662596?text=Hola%20M%C3%B3nica%2C%20vi%20la%20demo%20de%20Mesas%20de%20Ex%C3%A1menes%20en%20monicabattaglia.com%20y%20me%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20para%20mi%20instituci%C3%B3n." target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-bold shadow-sm">
+            📱 WhatsApp +54 9 262 266-2596
+          </a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL DE ACCESO ADMINISTRATIVO (PRECEPTORÍA / BEDELÍA) -->
+  <div id="adminModal" class="no-print fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>🔐</span>
+          <span>Acceso <span class="lblAreaAdminInline">Preceptoría</span></span>
+        </h3>
+        <button type="button" id="btnCloseAdminModal" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-600">
+        Ingresá la clave administrativa para gestionar la Base de Inscriptos, validar Correlativas, emitir Actas Volantes en A4 y configurar la institución.
+      </p>
+      <form id="formAdminLogin" class="space-y-3">
+        <div>
+          <label for="inpAdminPin" class="block text-xs font-bold text-slate-700 mb-1">Clave de acceso</label>
+          <input id="inpAdminPin" type="password" required placeholder="Ingresá 1234 o 9009" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" />
+        </div>
+        <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-900">
+          💡 <strong>Modo Demo Comercial:</strong> Podés ingresar con la clave <strong>1234</strong> (o <strong>9009</strong>) para probar todas las funciones administrativas.
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelAdminModal" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-[#1e3a8a] hover:bg-[#192b4d] text-white text-xs font-bold">
+            Ingresar al Panel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
+  <div id="toastContainer" class="no-print fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'mb_mesas_examenes_multi_v2';
+
+      // =========================================================================
+      // PLANTILLAS PRECARGADAS: 1) NIVEL SUPERIOR (IES) Y 2) UNIVERSIDAD
+      // =========================================================================
+      const PRESET_IES = {
+        presetType: 'IES',
+        institucion: {
+          tipo: 'IES',
+          nombre: 'INSTITUTO DE EDUCACIÓN SUPERIOR N° 9-009 “TUPUNGATO”',
+          nombreCorto: 'IES N° 9-009 “Tupungato”',
+          jurisdiccion: 'DIRECCIÓN GENERAL DE ESCUELAS · GOBIERNO DE MENDOZA',
+          localidad: 'Tupungato, Mendoza',
+          areaAdmin: 'Preceptoría',
+          renglonesActa: 25,
+          requiereLegajo: false,
+          usaLlamados: false,
+          incluyePromocional: false
+        },
+        turno: 'NOVIEMBRE - DICIEMBRE 2026',
+        adminPin: '1234',
+        carreras: [
+          {
+            id: 'energias',
+            nombre: 'TECNICATURA SUPERIOR EN ENERGÍAS RENOVABLES',
+            materias: [
+              { id: 'er1', anio: '1° AÑO', nombre: 'MÓDULO 2: Instalaciones eléctricas', fecha: '01/12/2026' },
+              { id: 'er2', anio: '1° AÑO', nombre: 'MÓDULO 3: Generación solar fototérmica', fecha: '03/12/2026' },
+              { id: 'er3', anio: '1° AÑO', nombre: 'MÓDULO 4: Instalaciones térmicas', fecha: '04/12/2026' },
+              { id: 'er4', anio: '1° AÑO', nombre: 'MÓDULO 6: Sistemas de Comunicación', fecha: '04/12/2026' },
+              { id: 'er5', anio: '2° AÑO', nombre: 'MÓDULO 11: Almacenamiento, Transformación y Transporte', fecha: '09/12/2026' },
+              { id: 'er6', anio: '2° AÑO', nombre: 'MÓDULO 12: Gestión de la energía', fecha: '10/12/2026' },
+              { id: 'er7', anio: '3° AÑO', nombre: 'MÓDULO 14: Negocio Energético', fecha: '11/12/2026' },
+              { id: 'er8', anio: '3° AÑO', nombre: 'MÓDULO 15: Sistemas de control automático', fecha: '14/12/2026' }
+            ]
+          },
+          {
+            id: 'logistica',
+            nombre: 'TECNICATURA SUPERIOR EN LOGÍSTICA',
+            materias: [
+              { id: 'lg1', anio: '1° AÑO', nombre: 'ADMINISTRACIÓN DE LAS ORGANIZACIONES', fecha: '02/12/2026' },
+              { id: 'lg2', anio: '1° AÑO', nombre: 'ESTADÍSTICA', fecha: '03/12/2026' },
+              { id: 'lg3', anio: '1° AÑO', nombre: 'GEOGRAFÍA ECONÓMICA', fecha: '04/12/2026' },
+              { id: 'lg4', anio: '1° AÑO', nombre: 'INFORMÁTICA Y TECNOLOGÍA I', fecha: '07/12/2026' },
+              { id: 'lg5', anio: '1° AÑO', nombre: 'PRÁCTICA PROFESIONAL I', fecha: '10/12/2026' },
+              { id: 'lg6', anio: '2° AÑO', nombre: 'ESTRUCTURA DE COSTOS', fecha: '11/12/2026' },
+              { id: 'lg7', anio: '3° AÑO', nombre: 'CONTROL DE GESTIÓN', fecha: '15/12/2026' }
+            ]
+          },
+          {
+            id: 'contabilidad',
+            nombre: 'CONTABILIDAD (PLAN 2019)',
+            materias: [
+              { id: 'ct1', anio: '1° AÑO', nombre: 'ADMINISTRACIÓN', fecha: '02/12/2026' },
+              { id: 'ct2', anio: '1° AÑO', nombre: 'CONTABILIDAD I', fecha: '04/12/2026' },
+              { id: 'ct3', anio: '1° AÑO', nombre: 'PRÁCTICA PROFESIONALIZANTE I', fecha: '09/12/2026' },
+              { id: 'ct4', anio: '2° AÑO', nombre: 'CÁLCULO FINANCIERO', fecha: '10/12/2026' },
+              { id: 'ct5', anio: '2° AÑO', nombre: 'CONTABILIDAD II', fecha: '11/12/2026' },
+              { id: 'ct6', anio: '2° AÑO', nombre: 'CONTABILIDAD PÚBLICA', fecha: '14/12/2026' },
+              { id: 'ct7', anio: '3° AÑO', nombre: 'DERECHO DE LA EMPRESA', fecha: '15/12/2026' }
+            ]
+          },
+          {
+            id: 'pep',
+            nombre: 'PROFESORADO DE EDUCACIÓN PRIMARIA (P.E.P.)',
+            materias: [
+              { id: 'pp1', anio: '1° AÑO', nombre: 'DIDÁCTICA GENERAL', fecha: '01/12/2026' },
+              { id: 'pp2', anio: '1° AÑO', nombre: 'LENGUA', fecha: '03/12/2026' },
+              { id: 'pp3', anio: '1° AÑO', nombre: 'MATEMÁTICA', fecha: '04/12/2026' },
+              { id: 'pp4', anio: '1° AÑO', nombre: 'PEDAGOGÍA', fecha: '07/12/2026' },
+              { id: 'pp5', anio: '2° AÑO', nombre: 'DIDÁCTICA DE LA LENGUA I', fecha: '10/12/2026' },
+              { id: 'pp6', anio: '3° AÑO', nombre: 'ALFABETIZACIÓN INICIAL', fecha: '14/12/2026' },
+              { id: 'pp7', anio: '4° AÑO', nombre: 'RESIDENCIA PEDAGÓGICA', fecha: '16/12/2026' }
+            ]
+          }
+        ],
+        inscripciones: [
+          {
+            id: 'INS-101',
+            timestamp: '10/11/2026 09:15',
+            email: 'lucianoguzman@gmail.com',
+            nombre: 'GUZMAN LUCIANO',
+            dni: '44438232',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2025',
+            condicion: 'REGULAR',
+            carreraId: 'energias',
+            anio: '1° AÑO',
+            materiaId: 'er3',
+            materiaNombre: 'MÓDULO 4: Instalaciones térmicas',
+            fechaMesa: '04/12/2026',
+            correlativa: 'Si',
+            escrito: '8',
+            oral: '9',
+            definitiva: '9'
+          },
+          {
+            id: 'INS-102',
+            timestamp: '10/11/2026 10:40',
+            email: 'msansebastian@gmail.com',
+            nombre: 'SAN SEBASTIAN MAURICIO',
+            dni: '39020241',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '10/2025',
+            condicion: 'REGULAR',
+            carreraId: 'energias',
+            anio: '1° AÑO',
+            materiaId: 'er3',
+            materiaNombre: 'MÓDULO 4: Instalaciones térmicas',
+            fechaMesa: '04/12/2026',
+            correlativa: 'Si',
+            escrito: '7',
+            oral: '8',
+            definitiva: '8'
+          },
+          {
+            id: 'INS-103',
+            timestamp: '10/11/2026 11:12',
+            email: 'valentinamendoza@gmail.com',
+            nombre: 'MENDOZA VALENTINA',
+            dni: '45112980',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2025',
+            condicion: 'REGULAR',
+            carreraId: 'energias',
+            anio: '1° AÑO',
+            materiaId: 'er3',
+            materiaNombre: 'MÓDULO 4: Instalaciones térmicas',
+            fechaMesa: '04/12/2026',
+            correlativa: 'Si',
+            escrito: '2',
+            oral: '-',
+            definitiva: '2'
+          },
+          {
+            id: 'INS-104',
+            timestamp: '10/11/2026 12:05',
+            email: 'federicorojas@gmail.com',
+            nombre: 'ROJAS FEDERICO',
+            dni: '43887123',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2024',
+            condicion: 'REGULAR',
+            carreraId: 'energias',
+            anio: '1° AÑO',
+            materiaId: 'er3',
+            materiaNombre: 'MÓDULO 4: Instalaciones térmicas',
+            fechaMesa: '04/12/2026',
+            correlativa: 'Si',
+            escrito: '',
+            oral: '',
+            definitiva: 'AUSENTE'
+          },
+          {
+            id: 'INS-105',
+            timestamp: '11/11/2026 14:20',
+            email: 'dariofrances@gmail.com',
+            nombre: 'FRANCES DARIO',
+            dni: '44010406',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2025',
+            condicion: 'REGULAR',
+            carreraId: 'logistica',
+            anio: '1° AÑO',
+            materiaId: 'lg5',
+            materiaNombre: 'PRÁCTICA PROFESIONAL I',
+            fechaMesa: '10/12/2026',
+            correlativa: 'Si',
+            escrito: '9',
+            oral: '10',
+            definitiva: '10'
+          },
+          {
+            id: 'INS-106',
+            timestamp: '11/11/2026 16:05',
+            email: 'dalmadefe@outlook.com',
+            nombre: 'DEFELICHE DALMA',
+            dni: '41271922',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2025',
+            condicion: 'REGULAR',
+            carreraId: 'logistica',
+            anio: '1° AÑO',
+            materiaId: 'lg5',
+            materiaNombre: 'PRÁCTICA PROFESIONAL I',
+            fechaMesa: '10/12/2026',
+            correlativa: 'Si',
+            escrito: '',
+            oral: '',
+            definitiva: ''
+          },
+          {
+            id: 'INS-107',
+            timestamp: '12/11/2026 08:30',
+            email: 'rocioaguilar@gmail.com',
+            nombre: 'AGUILAR ROCIO',
+            dni: '41992318',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2025',
+            condicion: 'REGULAR',
+            carreraId: 'pep',
+            anio: '1° AÑO',
+            materiaId: 'pp1',
+            materiaNombre: 'DIDÁCTICA GENERAL',
+            fechaMesa: '01/12/2026',
+            correlativa: 'Si',
+            escrito: '',
+            oral: '',
+            definitiva: ''
+          },
+          {
+            id: 'INS-108',
+            timestamp: '12/11/2026 09:45',
+            email: 'martinsosa@gmail.com',
+            nombre: 'SOSA MARTIN EZEQUIEL',
+            dni: '45672109',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '11/2025',
+            condicion: 'REGULAR',
+            carreraId: 'energias',
+            anio: '2° AÑO',
+            materiaId: 'er5',
+            materiaNombre: 'MÓDULO 11: Almacenamiento, Transformación y Transporte',
+            fechaMesa: '09/12/2026',
+            correlativa: 'Pendiente',
+            escrito: '',
+            oral: '',
+            definitiva: ''
+          },
+          {
+            id: 'INS-109',
+            timestamp: '12/11/2026 10:15',
+            email: 'camilaortiz@gmail.com',
+            nombre: 'ORTIZ CAMILA BELEN',
+            dni: '44908112',
+            legajo: '',
+            llamado: '1° LLAMADO',
+            regularidad: '07/2024',
+            condicion: 'LIBRE',
+            carreraId: 'contabilidad',
+            anio: '2° AÑO',
+            materiaId: 'ct5',
+            materiaNombre: 'CONTABILIDAD II',
+            fechaMesa: '11/12/2026',
+            correlativa: 'No',
+            escrito: '',
+            oral: '',
+            definitiva: ''
+          }
+        ],
+        actasMeta: {
+          'energias__1° AÑO__er3__REGULAR': {
+            libro: '14',
+            folio: '082',
+            presidente: 'Ing. Roberto Castellanos',
+            vocal1: 'Prof. Mónica Battaglia',
+            vocal2: 'Lic. Carolina Méndez'
+          }
+        }
+      };
+
+      const PRESET_UNIVERSIDAD = {
+        presetType: 'UNIVERSIDAD',
+        institucion: {
+          tipo: 'UNIVERSIDAD',
+          nombre: 'FACULTAD DE CIENCIAS APLICADAS E INGENIERÍA',
+          nombreCorto: 'Facultad de Ciencias Aplicadas e Ingeniería',
+          jurisdiccion: 'UNIVERSIDAD NACIONAL · SECRETARÍA ACADÉMICA',
+          localidad: 'Mendoza, República Argentina',
+          areaAdmin: 'Bedelía / Depto. Alumnos',
+          renglonesActa: 30,
+          requiereLegajo: true,
+          usaLlamados: true,
+          incluyePromocional: true
+        },
+        turno: 'TURNO ORDINARIO NOVIEMBRE - DICIEMBRE 2026',
+        adminPin: '1234',
+        carreras: [
+          {
+            id: 'ingsistemas',
+            nombre: 'INGENIERÍA EN SISTEMAS DE INFORMACIÓN (5 AÑOS)',
+            materias: [
+              { id: 'is1', anio: '1° AÑO', nombre: 'CÁTEDRA: Análisis Matemático I', fecha: '01/12/2026' },
+              { id: 'is2', anio: '1° AÑO', nombre: 'CÁTEDRA: Algoritmos y Estructuras de Datos', fecha: '03/12/2026' },
+              { id: 'is3', anio: '2° AÑO', nombre: 'CÁTEDRA: Paradigmas de Programación', fecha: '04/12/2026' },
+              { id: 'is4', anio: '3° AÑO', nombre: 'CÁTEDRA: Bases de Datos y Sistemas Operativos', fecha: '09/12/2026' },
+              { id: 'is5', anio: '4° AÑO', nombre: 'CÁTEDRA: Ingeniería de Software II', fecha: '11/12/2026' },
+              { id: 'is6', anio: '5° AÑO', nombre: 'CÁTEDRA: Inteligencia Artificial y Proyecto Final', fecha: '15/12/2026' }
+            ]
+          },
+          {
+            id: 'contador',
+            nombre: 'CONTADOR PÚBLICO NACIONAL Y LIC. EN ADMINISTRACIÓN',
+            materias: [
+              { id: 'cp1', anio: '1° AÑO', nombre: 'CÁTEDRA: Introducción a las Ciencias Económicas', fecha: '02/12/2026' },
+              { id: 'cp2', anio: '2° AÑO', nombre: 'CÁTEDRA: Microeconomía y Macroeconomía', fecha: '04/12/2026' },
+              { id: 'cp3', anio: '3° AÑO', nombre: 'CÁTEDRA: Estados Contables y Auditoría', fecha: '10/12/2026' },
+              { id: 'cp4', anio: '4° AÑO', nombre: 'CÁTEDRA: Régimen Tributario y Finanzas Públicas', fecha: '14/12/2026' },
+              { id: 'cp5', anio: '5° AÑO', nombre: 'CÁTEDRA: Práctica Profesional y Sindicatura', fecha: '17/12/2026' }
+            ]
+          },
+          {
+            id: 'abogacia',
+            nombre: 'ABOGACÍA (PLAN UNIVERSITARIO)',
+            materias: [
+              { id: 'ab1', anio: '1° AÑO', nombre: 'CÁTEDRA: Derecho Romano e Historia del Derecho', fecha: '01/12/2026' },
+              { id: 'ab2', anio: '2° AÑO', nombre: 'CÁTEDRA: Derecho Constitucional y Administrativo', fecha: '05/12/2026' },
+              { id: 'ab3', anio: '3° AÑO', nombre: 'CÁTEDRA: Contratos Civiles y Comerciales', fecha: '09/12/2026' },
+              { id: 'ab4', anio: '4° AÑO', nombre: 'CÁTEDRA: Derecho Procesal Civil y Penal', fecha: '12/12/2026' },
+              { id: 'ab5', anio: '5° AÑO', nombre: 'CÁTEDRA: Derecho Internacional Privado', fecha: '16/12/2026' }
+            ]
+          }
+        ],
+        inscripciones: [
+          {
+            id: 'UNI-201',
+            timestamp: '10/11/2026 09:10',
+            email: 'santiago.moreno@uncu.edu.ar',
+            nombre: 'MORENO SANTIAGO NICOLAS',
+            dni: '43912844',
+            legajo: '29410/4',
+            llamado: '1° LLAMADO',
+            regularidad: '2° Cuat. 2025',
+            condicion: 'REGULAR',
+            carreraId: 'ingsistemas',
+            anio: '3° AÑO',
+            materiaId: 'is4',
+            materiaNombre: 'CÁTEDRA: Bases de Datos y Sistemas Operativos',
+            fechaMesa: '09/12/2026',
+            correlativa: 'Si',
+            escrito: '9',
+            oral: '9',
+            definitiva: '9'
+          },
+          {
+            id: 'UNI-202',
+            timestamp: '10/11/2026 10:05',
+            email: 'julieta.peralta@uncu.edu.ar',
+            nombre: 'PERALTA JULIETA AGUSTINA',
+            dni: '44501920',
+            legajo: '30112/1',
+            llamado: '1° LLAMADO',
+            regularidad: '2° Cuat. 2025',
+            condicion: 'REGULAR',
+            carreraId: 'ingsistemas',
+            anio: '3° AÑO',
+            materiaId: 'is4',
+            materiaNombre: 'CÁTEDRA: Bases de Datos y Sistemas Operativos',
+            fechaMesa: '09/12/2026',
+            correlativa: 'Si',
+            escrito: '10',
+            oral: '10',
+            definitiva: '10'
+          },
+          {
+            id: 'UNI-203',
+            timestamp: '11/11/2026 11:30',
+            email: 'tomas.villalba@uncu.edu.ar',
+            nombre: 'VILLALBA TOMAS',
+            dni: '42889104',
+            legajo: '28105/8',
+            llamado: '1° LLAMADO',
+            regularidad: '1° Cuat. 2025',
+            condicion: 'REGULAR',
+            carreraId: 'ingsistemas',
+            anio: '3° AÑO',
+            materiaId: 'is4',
+            materiaNombre: 'CÁTEDRA: Bases de Datos y Sistemas Operativos',
+            fechaMesa: '09/12/2026',
+            correlativa: 'Si',
+            escrito: '4',
+            oral: '3',
+            definitiva: '3'
+          },
+          {
+            id: 'UNI-204',
+            timestamp: '11/11/2026 15:20',
+            email: 'florencia.navarro@uncu.edu.ar',
+            nombre: 'NAVARRO FLORENCIA',
+            dni: '45102938',
+            legajo: '31044/2',
+            llamado: '2° LLAMADO',
+            regularidad: '2° Cuat. 2025',
+            condicion: 'PROMOCIONAL',
+            carreraId: 'ingsistemas',
+            anio: '5° AÑO',
+            materiaId: 'is6',
+            materiaNombre: 'CÁTEDRA: Inteligencia Artificial y Proyecto Final',
+            fechaMesa: '15/12/2026',
+            correlativa: 'Pendiente',
+            escrito: '',
+            oral: '',
+            definitiva: ''
+          },
+          {
+            id: 'UNI-205',
+            timestamp: '12/11/2026 08:40',
+            email: 'agustin.correa@uncu.edu.ar',
+            nombre: 'CORREA AGUSTIN',
+            dni: '43119283',
+            legajo: '27990/5',
+            llamado: '1° LLAMADO',
+            regularidad: '2024',
+            condicion: 'LIBRE',
+            carreraId: 'contador',
+            anio: '3° AÑO',
+            materiaId: 'cp3',
+            materiaNombre: 'CÁTEDRA: Estados Contables y Auditoría',
+            fechaMesa: '10/12/2026',
+            correlativa: 'No',
+            escrito: '',
+            oral: '',
+            definitiva: ''
+          }
+        ],
+        actasMeta: {
+          'ingsistemas__3° AÑO__is4__REGULAR': {
+            libro: 'A-42',
+            folio: '195',
+            presidente: 'Dr. Ing. Alejandro Quiroga',
+            vocal1: 'Esp. Mónica Battaglia',
+            vocal2: 'Ing. Marcos Echegaray'
+          }
+        }
+      };
+
+      // =========================================================================
+      // FUNCIONES DE UTILIDAD Y ESTADO
+      // =========================================================================
+      function cloneObj(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return cloneObj(PRESET_IES);
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.institucion || !Array.isArray(parsed.carreras)) {
+            return cloneObj(PRESET_IES);
+          }
+          return parsed;
+        } catch (e) {
+          return cloneObj(PRESET_IES);
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+          console.error('No se pudo guardar en localStorage', e);
+        }
+      }
+
+      let state = loadState();
+      let activeTab = 'inscripcion';
+      let selectedMesaKey = '';
+      let isAdmin = false;
+      let sessionComprobantes = [];
+
+      function escapeHtml(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function formatDni(dni) {
+        const digits = String(dni || '').replace(/\D/g, '');
+        if (!digits) return String(dni || '');
+        return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      }
+
+      function notaEnLetras(val) {
+        const clean = String(val || '').trim().toUpperCase();
+        if (!clean) return '';
+        if (clean === 'A' || clean === 'AUS' || clean === 'AUSENTE') return 'AUSENTE';
+        const n = parseInt(clean, 10);
+        const mapa = {
+          0: 'CERO',
+          1: 'UNO',
+          2: 'DOS',
+          3: 'TRES',
+          4: 'CUATRO',
+          5: 'CINCO',
+          6: 'SEIS',
+          7: 'SIETE',
+          8: 'OCHO',
+          9: 'NUEVE',
+          10: 'DIEZ'
+        };
+        return mapa[n] || clean;
+      }
+
+      function showToast(msg, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        const colors = {
+          success: 'bg-slate-900 text-white border-emerald-400',
+          error: 'bg-red-900 text-white border-red-400',
+          info: 'bg-[#192b4d] text-white border-blue-400'
+        };
+        toast.className = `px-4 py-3 rounded-xl shadow-lg border-l-4 text-xs font-semibold flex items-center gap-2 ${colors[type] || colors.success}`;
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.remove();
+        }, 3400);
+      }
+
+      function getCarreraNombre(carreraId) {
+        const c = state.carreras.find((x) => x.id === carreraId);
+        return c ? c.nombre : carreraId;
+      }
+
+      function getMesaKey(ins) {
+        return `${ins.carreraId}__${ins.anio}__${ins.materiaId}__${ins.condicion}`;
+      }
+
+      function getActasGroups() {
+        const map = new Map();
+        state.inscripciones
+          .filter((ins) => ins.correlativa === 'Si')
+          .forEach((ins) => {
+            const key = getMesaKey(ins);
+            if (!map.has(key)) {
+              map.set(key, {
+                key,
+                carreraId: ins.carreraId,
+                carreraNombre: getCarreraNombre(ins.carreraId),
+                anio: ins.anio,
+                materiaId: ins.materiaId,
+                materiaNombre: ins.materiaNombre,
+                fechaMesa: ins.fechaMesa,
+                condicion: ins.condicion,
+                alumnos: []
+              });
+            }
+            map.get(key).alumnos.push(ins);
+          });
+        return Array.from(map.values());
+      }
+
+      // =========================================================================
+      // ACTUALIZACIÓN DE CABECERA E INTERFAZ MULTI-INSTITUCIÓN
+      // =========================================================================
+      function applyInstitutionUI() {
+        const inst = state.institucion;
+        document.getElementById('hdrJurisdiccion').textContent = inst.jurisdiccion || 'INSTITUCIÓN EDUCATIVA';
+        document.getElementById('hdrInstitucion').textContent = inst.nombreCorto || inst.nombre;
+        document.getElementById('hdrTurno').textContent = state.turno;
+        document.getElementById('hdrTipoBadge').textContent =
+          inst.tipo === 'UNIVERSIDAD' ? '🎓 Nivel Universitario' : '🏛️ Nivel Superior (IES)';
+
+        // Nombre del área administrativa (Preceptoría vs Bedelía)
+        const area = inst.areaAdmin || 'Preceptoría';
+        document.querySelectorAll('.lblAreaAdminInline').forEach((el) => {
+          el.textContent = area;
+        });
+        document.getElementById('hintAreaName').textContent = area;
+
+        // Mostrar u ocultar Legajo y Llamados en formulario
+        const wrapLegajo = document.getElementById('fieldWrapLegajo');
+        const inpLegajo = document.getElementById('inpLegajo');
+        if (inst.requiereLegajo) {
+          wrapLegajo.classList.remove('hidden');
+          inpLegajo.required = true;
+        } else {
+          wrapLegajo.classList.add('hidden');
+          inpLegajo.required = false;
+        }
+
+        const wrapLlamado = document.getElementById('fieldWrapLlamado');
+        if (inst.usaLlamados) {
+          wrapLlamado.classList.remove('hidden');
+        } else {
+          wrapLlamado.classList.add('hidden');
+        }
+
+        // Condiciones disponibles
+        const condiciones = ['REGULAR', 'LIBRE', 'EQUIVALENCIA'];
+        if (inst.incluyePromocional) condiciones.push('PROMOCIONAL');
+
+        const selCond = document.getElementById('inpCondicion');
+        const prevCond = selCond.value;
+        selCond.innerHTML = condiciones.map((c) => `<option value="${c}">${c}</option>`).join('');
+        if (condiciones.includes(prevCond)) selCond.value = prevCond;
+
+        // Etiqueta de renglones del acta
+        const renglones = inst.renglonesActa || 25;
+        document.getElementById('lblChkRenglones').textContent =
+          `Completar hasta ${renglones} renglones reglamentarios para impresión`;
+
+        // Estado visual de botones de Demo Preset
+        const btnIES = document.getElementById('btnPresetIES');
+        const btnUni = document.getElementById('btnPresetUni');
+        if (inst.tipo === 'UNIVERSIDAD') {
+          btnUni.className = 'px-3 py-1 rounded-md font-semibold transition-all bg-emerald-500 text-slate-950 shadow-sm';
+          btnIES.className = 'px-3 py-1 rounded-md font-semibold transition-all text-slate-300 hover:text-white';
+        } else {
+          btnIES.className = 'px-3 py-1 rounded-md font-semibold transition-all bg-emerald-500 text-slate-950 shadow-sm';
+          btnUni.className = 'px-3 py-1 rounded-md font-semibold transition-all text-slate-300 hover:text-white';
+        }
+
+        updateRoleUI();
+        updateBadges();
+      }
+
+      function updateRoleUI() {
+        const area = state.institucion.areaAdmin || 'Preceptoría';
+        const navBase = document.getElementById('navBtnBase');
+        const navActas = document.getElementById('navBtnActas');
+        const navConfig = document.getElementById('navBtnConfig');
+        const btnAdminLabel = document.getElementById('btnAdminLabel');
+        const roleBadge = document.getElementById('roleStatusBadge');
+        const wrapCorrForm = document.getElementById('wrapAdminCorrelativaForm');
+        const btnVerTodas = document.getElementById('btnVerTodasEnBase');
+        const lblQuickDemo = document.getElementById('lblQuickAdminDemo');
+
+        if (isAdmin) {
+          navBase.classList.remove('hidden');
+          navActas.classList.remove('hidden');
+          navConfig.classList.remove('hidden');
+          btnAdminLabel.textContent = `Salir de ${area}`;
+          roleBadge.textContent = `🔓 ${area} Activa`;
+          roleBadge.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40';
+          wrapCorrForm.classList.remove('hidden');
+          btnVerTodas.classList.remove('hidden');
+          lblQuickDemo.textContent = 'Volver a Vista Estudiante';
+        } else {
+          navBase.classList.add('hidden');
+          navActas.classList.add('hidden');
+          navConfig.classList.add('hidden');
+          btnAdminLabel.textContent = `Acceso ${area}`;
+          roleBadge.textContent = '👤 Modo Estudiante';
+          roleBadge.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 text-blue-100 border border-white/15';
+          wrapCorrForm.classList.add('hidden');
+          btnVerTodas.classList.add('hidden');
+          lblQuickDemo.textContent = `Probar Vista ${area} / Actas (1 clic)`;
+          if (activeTab !== 'inscripcion') {
+            switchTab('inscripcion');
+          }
+        }
+      }
+
+      function switchTab(tabName) {
+        if (!isAdmin && tabName !== 'inscripcion') {
+          document.getElementById('adminModal').classList.remove('hidden');
+          return;
+        }
+        activeTab = tabName;
+        document.querySelectorAll('.tab-panel').forEach((panel) => {
+          panel.classList.toggle('hidden', panel.id !== `tab-${tabName}`);
+        });
+        document.querySelectorAll('.tab-btn').forEach((btn) => {
+          const isCurrent = btn.getAttribute('data-tab') === tabName;
+          if (isCurrent) {
+            btn.className = 'tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition bg-emerald-500 text-slate-950 shadow-sm flex items-center gap-1.5';
+          } else {
+            btn.className = 'tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-blue-100 hover:bg-white/10 flex items-center gap-1.5';
+            if (!isAdmin && btn.getAttribute('data-tab') !== 'inscripcion') {
+              btn.classList.add('hidden');
+            }
+          }
+        });
+
+        if (tabName === 'base') {
+          populateBaseFilters();
+          renderBaseTable();
+        } else if (tabName === 'actas') {
+          renderActasView();
+        } else if (tabName === 'config') {
+          renderConfigView();
+        }
+      }
+
+      function updateBadges() {
+        document.getElementById('badgeTotalInscriptos').textContent = state.inscripciones.length;
+        document.getElementById('badgeTotalActas').textContent = getActasGroups().length;
+      }
+
+      // =========================================================================
+      // PESTAÑA 1: FORMULARIO DE INSCRIPCIÓN Y COMPROBANTES
+      // =========================================================================
+      function populateInscripcionForm() {
+        const selCarrera = document.getElementById('inpCarrera');
+        const prevCarrera = selCarrera.value;
+        selCarrera.innerHTML = state.carreras
+          .map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nombre)}</option>`)
+          .join('');
+        if (prevCarrera && state.carreras.some((c) => c.id === prevCarrera)) {
+          selCarrera.value = prevCarrera;
+        }
+        updateAniosForCarrera();
+      }
+
+      function updateAniosForCarrera() {
+        const carreraId = document.getElementById('inpCarrera').value;
+        const carrera = state.carreras.find((c) => c.id === carreraId);
+        const selAnio = document.getElementById('inpAnio');
+        const anios = carrera
+          ? [...new Set(carrera.materias.map((m) => m.anio))]
+          : ['1° AÑO', '2° AÑO', '3° AÑO'];
+        const prev = selAnio.value;
+        selAnio.innerHTML = anios.map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+        if (prev && anios.includes(prev)) selAnio.value = prev;
+        updateMateriasForCarreraAnio();
+      }
+
+      function updateMateriasForCarreraAnio() {
+        const carreraId = document.getElementById('inpCarrera').value;
+        const anio = document.getElementById('inpAnio').value;
+        const carrera = state.carreras.find((c) => c.id === carreraId);
+        const selMat = document.getElementById('inpMateria');
+        const materias = carrera ? carrera.materias.filter((m) => m.anio === anio) : [];
+        selMat.innerHTML = materias
+          .map((m) => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.nombre)}</option>`)
+          .join('');
+        updateFechaPreview();
+      }
+
+      function updateFechaPreview() {
+        const carreraId = document.getElementById('inpCarrera').value;
+        const matId = document.getElementById('inpMateria').value;
+        const carrera = state.carreras.find((c) => c.id === carreraId);
+        const mat = carrera ? carrera.materias.find((m) => m.id === matId) : null;
+        document.getElementById('previewFechaMesa').textContent = mat ? mat.fecha : 'A confirmar';
+      }
+
+      function imprimirComprobanteIndividual(insId) {
+        const ins = state.inscripciones.find((x) => x.id === insId);
+        if (!ins) return;
+        const printArea = document.getElementById('printComprobanteArea');
+        printArea.innerHTML = `
+          <div class="text-center border-b-2 border-slate-800 pb-3 mb-4">
+            <p class="text-[11px] font-bold uppercase text-slate-600">${escapeHtml(state.institucion.jurisdiccion)}</p>
+            <h2 class="text-base font-bold uppercase mt-0.5">${escapeHtml(state.institucion.nombre)}</h2>
+            <p class="text-xs font-semibold text-slate-700 mt-1">COMPROBANTE DE INSCRIPCIÓN A MESA DE EXAMEN — ${escapeHtml(state.turno)}</p>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">Código de Comprobante:</span>
+              <span class="font-mono font-bold">${escapeHtml(ins.id)}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">Fecha y Hora de Registro:</span>
+              <span>${escapeHtml(ins.timestamp)}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">Estudiante:</span>
+              <span class="font-semibold">${escapeHtml(ins.nombre)}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">D.N.I.${ins.legajo ? ' / Legajo' : ''}:</span>
+              <span>${escapeHtml(formatDni(ins.dni))}${ins.legajo ? ' · Leg. ' + escapeHtml(ins.legajo) : ''}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">Carrera:</span>
+              <span class="text-right font-semibold">${escapeHtml(getCarreraNombre(ins.carreraId))}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">Espacio Curricular / Materia:</span>
+              <span class="text-right font-semibold">${escapeHtml(ins.materiaNombre)} (${escapeHtml(ins.anio)})</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-200 py-1">
+              <span class="font-bold">Condición y Fecha de Examen:</span>
+              <span class="font-bold">${escapeHtml(ins.condicion)} — ${escapeHtml(ins.fechaMesa)}</span>
+            </div>
+          </div>
+          <p class="mt-6 text-[11px] text-slate-500 text-center">
+            Conserve este comprobante. La inclusión definitiva en el Acta Volante está sujeta a la verificación de correlatividades por ${escapeHtml(state.institucion.areaAdmin)}.
+          </p>
+        `;
+        document.body.classList.add('printing-comprobante');
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-comprobante');
+        }, 500);
+      }
+
+      function renderUltimasInscripciones() {
+        const container = document.getElementById('ultimasInscripcionesList');
+        const list = isAdmin ? state.inscripciones.slice(-4).reverse() : sessionComprobantes.slice().reverse();
+
+        document.getElementById('sideComprobantesTitle').textContent = isAdmin
+          ? 'Últimas Inscripciones Recibidas'
+          : 'Mis Comprobantes (Sesión Actual)';
+
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div class="rounded-xl bg-slate-50 border border-dashed border-slate-200 p-4 text-center text-slate-500">
+              Al enviar el formulario aparecerá aquí tu comprobante de inscripción listo para imprimir o guardar en PDF.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = list
+          .map((ins) => {
+            const badgeColor =
+              ins.correlativa === 'Si'
+                ? 'bg-emerald-100 text-emerald-800'
+                : ins.correlativa === 'No'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-amber-100 text-amber-800';
+            return `
+              <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-[11px] font-bold text-[#1e3a8a]">#${escapeHtml(ins.id)}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">
+                    Correlativa: ${escapeHtml(ins.correlativa)}
+                  </span>
+                </div>
+                <p class="font-bold text-slate-900">${escapeHtml(ins.nombre)}</p>
+                <p class="text-[11px] text-slate-600">${escapeHtml(ins.materiaNombre)} (${escapeHtml(ins.anio)})</p>
+                <div class="flex items-center justify-between pt-1 border-t border-slate-200/70 text-[11px]">
+                  <span class="font-semibold text-slate-700">📅 ${escapeHtml(ins.fechaMesa)} · ${escapeHtml(ins.condicion)}</span>
+                  <button type="button" data-print-comp="${escapeHtml(ins.id)}" class="text-[#1e3a8a] font-bold hover:underline">
+                    🖨️ Imprimir
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      // =========================================================================
+      // PESTAÑA 2: BASE GENERAL DE INSCRIPTOS
+      // =========================================================================
+      function populateBaseFilters() {
+        const fltCarrera = document.getElementById('fltCarrera');
+        const prevC = fltCarrera.value;
+        fltCarrera.innerHTML =
+          `<option value="">Todas las carreras</option>` +
+          state.carreras.map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nombre)}</option>`).join('');
+        if (prevC) fltCarrera.value = prevC;
+
+        const anios = [...new Set(state.carreras.flatMap((c) => c.materias.map((m) => m.anio)))];
+        const fltAnio = document.getElementById('fltAnio');
+        const prevA = fltAnio.value;
+        fltAnio.innerHTML =
+          `<option value="">Todos los años</option>` +
+          anios.map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+        if (prevA) fltAnio.value = prevA;
+
+        const condiciones = ['REGULAR', 'LIBRE', 'EQUIVALENCIA', 'PROMOCIONAL'];
+        const fltCond = document.getElementById('fltCondicion');
+        const prevCond = fltCond.value;
+        fltCond.innerHTML =
+          `<option value="">Todas las condiciones</option>` +
+          condiciones.map((c) => `<option value="${c}">${c}</option>`).join('');
+        if (prevCond) fltCond.value = prevCond;
+      }
+
+      function getFilteredInscripciones() {
+        const q = document.getElementById('fltSearch').value.trim().toLowerCase();
+        const cId = document.getElementById('fltCarrera').value;
+        const anio = document.getElementById('fltAnio').value;
+        const cond = document.getElementById('fltCondicion').value;
+        const corr = document.getElementById('fltCorrelativa').value;
+
+        return state.inscripciones.filter((ins) => {
+          if (cId && ins.carreraId !== cId) return false;
+          if (anio && ins.anio !== anio) return false;
+          if (cond && ins.condicion !== cond) return false;
+          if (corr && ins.correlativa !== corr) return false;
+          if (q) {
+            const hay = `${ins.nombre} ${ins.dni} ${ins.legajo || ''} ${ins.materiaNombre}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
+      }
+
+      function renderBaseTable() {
+        const total = state.inscripciones.length;
+        const hab = state.inscripciones.filter((x) => x.correlativa === 'Si').length;
+        const pend = state.inscripciones.filter((x) => x.correlativa === 'Pendiente').length;
+        const noHab = state.inscripciones.filter((x) => x.correlativa === 'No').length;
+
+        document.getElementById('baseSummaryPills').innerHTML = `
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+            <span class="text-[11px] text-slate-500 font-semibold">Total Inscriptos</span>
+            <p class="text-lg font-bold text-slate-900">${total}</p>
+          </div>
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3">
+            <span class="text-[11px] text-emerald-800 font-semibold">✅ Habilitados (En Acta)</span>
+            <p class="text-lg font-bold text-emerald-900">${hab}</p>
+          </div>
+          <div class="rounded-xl bg-amber-50 border border-amber-200 p-3">
+            <span class="text-[11px] text-amber-800 font-semibold">⏳ Pendientes de Revisión</span>
+            <p class="text-lg font-bold text-amber-900">${pend}</p>
+          </div>
+          <div class="rounded-xl bg-red-50 border border-red-200 p-3">
+            <span class="text-[11px] text-red-800 font-semibold">❌ Observados / Sin Correlativa</span>
+            <p class="text-lg font-bold text-red-900">${noHab}</p>
+          </div>
+        `;
+
+        const rows = getFilteredInscripciones();
+        const tbody = document.getElementById('baseTableBody');
+
+        if (rows.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="py-8 text-center text-slate-400">
+                No se encontraron inscripciones con los filtros seleccionados.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = rows
+          .map((ins) => {
+            const selectClass =
+              ins.correlativa === 'Si'
+                ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                : ins.correlativa === 'No'
+                ? 'bg-red-50 text-red-900 border-red-300'
+                : 'bg-amber-50 text-amber-900 border-amber-300';
+
+            return `
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-3">
+                  <div class="font-bold text-slate-900">${escapeHtml(ins.nombre)}</div>
+                  <div class="text-[11px] text-slate-500">${escapeHtml(ins.email)} · <span class="font-mono">${escapeHtml(ins.id)}</span></div>
+                </td>
+                <td class="py-2.5 px-3 whitespace-nowrap">
+                  <div class="font-semibold text-slate-800">${escapeHtml(formatDni(ins.dni))}</div>
+                  ${ins.legajo ? `<div class="text-[11px] text-slate-500">Leg: ${escapeHtml(ins.legajo)}</div>` : ''}
+                </td>
+                <td class="py-2.5 px-3 text-[11px] font-medium text-slate-700">${escapeHtml(getCarreraNombre(ins.carreraId))}</td>
+                <td class="py-2.5 px-3 whitespace-nowrap">
+                  <span class="font-semibold text-slate-800">${escapeHtml(ins.anio)}</span>
+                  <span class="ml-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">${escapeHtml(ins.condicion)}</span>
+                </td>
+                <td class="py-2.5 px-3">
+                  <div class="font-semibold text-slate-900">${escapeHtml(ins.materiaNombre)}</div>
+                  <div class="text-[11px] text-[#1e3a8a] font-medium">📅 ${escapeHtml(ins.fechaMesa)} ${ins.llamado && state.institucion.usaLlamados ? '· ' + escapeHtml(ins.llamado) : ''}</div>
+                </td>
+                <td class="py-2.5 px-3 text-center">${escapeHtml(ins.regularidad || '-')}</td>
+                <td class="py-2.5 px-3 text-center">
+                  <select data-corr-id="${escapeHtml(ins.id)}" class="rounded-lg border px-2.5 py-1 text-xs font-bold ${selectClass}">
+                    <option value="Si" ${ins.correlativa === 'Si' ? 'selected' : ''}>✅ Sí (Pasa al Acta)</option>
+                    <option value="Pendiente" ${ins.correlativa === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+                    <option value="No" ${ins.correlativa === 'No' ? 'selected' : ''}>❌ No habilitado</option>
+                  </select>
+                </td>
+                <td class="py-2.5 px-3 text-right whitespace-nowrap">
+                  <button type="button" data-del-id="${escapeHtml(ins.id)}" class="text-red-600 hover:text-red-800 font-semibold text-xs px-2 py-1 rounded hover:bg-red-50">
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      // =========================================================================
+      // PESTAÑA 3: ACTAS VOLANTES E IMPRESIÓN OFICIAL A4
+      // =========================================================================
+      function computeStats(alumnos) {
+        let aprobados = 0;
+        let desaprobados = 0;
+        let ausentes = 0;
+        alumnos.forEach((al) => {
+          const raw = String(al.definitiva || '').trim().toUpperCase();
+          if (!raw) return;
+          if (raw === 'A' || raw === 'AUS' || raw === 'AUSENTE') {
+            ausentes++;
+            return;
+          }
+          const num = parseFloat(raw);
+          if (!isNaN(num)) {
+            if (num >= 4) aprobados++;
+            else desaprobados++;
+          }
+        });
+        return {
+          total: alumnos.length,
+          aprobados,
+          desaprobados,
+          ausentes
+        };
+      }
+
+      function renderActasView() {
+        const groups = getActasGroups();
+        const sel = document.getElementById('selActaMesa');
+
+        if (groups.length === 0) {
+          sel.innerHTML = `<option value="">Sin mesas con alumnos habilitados</option>`;
+          document.getElementById('actaPrintable').innerHTML = `
+            <div class="text-center py-12 text-slate-500 text-sm">
+              No hay estudiantes con <strong>Correlativa = "Sí"</strong>. Habilitá alumnos en la pestaña "2. Base y Correlativas" para generar el Acta Volante.
+            </div>
+          `;
+          return;
+        }
+
+        if (!selectedMesaKey || !groups.some((g) => g.key === selectedMesaKey)) {
+          selectedMesaKey = groups[0].key;
+        }
+
+        sel.innerHTML = groups
+          .map(
+            (g) =>
+              `<option value="${escapeHtml(g.key)}" ${g.key === selectedMesaKey ? 'selected' : ''}>
+                ${escapeHtml(g.carreraNombre)} · ${escapeHtml(g.anio)} · ${escapeHtml(g.materiaNombre)} [${escapeHtml(g.condicion)}] (${g.alumnos.length} hab.)
+              </option>`
+          )
+          .join('');
+
+        const currentGroup = groups.find((g) => g.key === selectedMesaKey) || groups[0];
+        const meta = state.actasMeta[currentGroup.key] || {
+          libro: '',
+          folio: '',
+          presidente: '',
+          vocal1: '',
+          vocal2: ''
+        };
+
+        document.getElementById('inpLibro').value = meta.libro || '';
+        document.getElementById('inpFolio').value = meta.folio || '';
+        document.getElementById('inpPresidente').value = meta.presidente || '';
+        document.getElementById('inpVocal1').value = meta.vocal1 || '';
+        document.getElementById('inpVocal2').value = meta.vocal2 || '';
+
+        renderPrintableActa(currentGroup, meta);
+      }
+
+      function renderPrintableActa(group, meta) {
+        const inst = state.institucion;
+        const stats = computeStats(group.alumnos);
+        document.getElementById('actaStatsBar').innerHTML = `
+          <span class="text-slate-700">Inscriptos Habilitados: <strong>${stats.total}</strong></span>
+          <span class="text-emerald-700">Aprobados: <strong>${stats.aprobados}</strong></span>
+          <span class="text-red-700">Desaprobados: <strong>${stats.desaprobados}</strong></span>
+          <span class="text-amber-700">Ausentes: <strong>${stats.ausentes}</strong></span>
+        `;
+
+        const rellenar = document.getElementById('chkRellenarRenglones').checked;
+        const maxRenglones = parseInt(inst.renglonesActa, 10) || 25;
+        const totalRows = rellenar ? Math.max(maxRenglones, group.alumnos.length) : group.alumnos.length;
+        const sortedAlumnos = [...group.alumnos].sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+        const colDocHeader = inst.requiereLegajo ? 'DNI / Legajo' : 'Tipo y N° de Documento';
+
+        let rowsHtml = '';
+        for (let i = 0; i < totalRows; i++) {
+          const al = sortedAlumnos[i];
+          if (al) {
+            const letras = notaEnLetras(al.definitiva);
+            rowsHtml += `
+              <tr>
+                <td class="text-center font-medium py-1.5 px-2">${i + 1}</td>
+                <td class="text-center py-1.5 px-2">${escapeHtml(al.regularidad || '')}</td>
+                <td class="text-center py-1.5 px-1.5 w-12">${inst.requiereLegajo && al.legajo ? escapeHtml(al.legajo) : 'DNI'}</td>
+                <td class="text-center py-1.5 px-2 whitespace-nowrap">${escapeHtml(formatDni(al.dni))}</td>
+                <td class="py-1.5 px-2 font-semibold text-slate-900">${escapeHtml(al.nombre)}</td>
+                <td class="p-1 text-center">
+                  <input type="text" data-grade-id="${escapeHtml(al.id)}" data-grade-field="escrito" value="${escapeHtml(al.escrito)}" placeholder="-" class="acta-input w-14 text-center text-xs border border-slate-300 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#1e3a8a]" />
+                </td>
+                <td class="p-1 text-center">
+                  <input type="text" data-grade-id="${escapeHtml(al.id)}" data-grade-field="oral" value="${escapeHtml(al.oral)}" placeholder="-" class="acta-input w-14 text-center text-xs border border-slate-300 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#1e3a8a]" />
+                </td>
+                <td class="p-1 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <input type="text" data-grade-id="${escapeHtml(al.id)}" data-grade-field="definitiva" value="${escapeHtml(al.definitiva)}" placeholder="Nota" class="acta-input w-16 text-center text-xs font-bold border border-slate-300 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#1e3a8a]" />
+                    <span class="text-[10px] font-semibold text-slate-600 min-w-[44px] text-left">${escapeHtml(letras ? '(' + letras + ')' : '')}</span>
+                    <button type="button" data-mark-ausente="${escapeHtml(al.id)}" title="Marcar Ausente" class="no-print px-1.5 py-0.5 text-[10px] rounded bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-900 font-bold">A</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else {
+            rowsHtml += `
+              <tr>
+                <td class="text-center text-slate-400 py-1.5 px-2">${i + 1}</td>
+                <td class="py-1.5 px-2"></td>
+                <td class="py-1.5 px-2"></td>
+                <td class="py-1.5 px-2"></td>
+                <td class="py-1.5 px-2"></td>
+                <td class="py-1.5 px-2"></td>
+                <td class="py-1.5 px-2"></td>
+                <td class="py-1.5 px-2"></td>
+              </tr>
+            `;
+          }
+        }
+
+        document.getElementById('actaPrintable').innerHTML = `
+          <div class="text-center border-b-2 border-slate-900 pb-3 mb-4">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-700">${escapeHtml(inst.jurisdiccion)}</p>
+            <h2 class="text-sm sm:text-base font-bold uppercase tracking-wide mt-0.5">${escapeHtml(inst.nombre)}</h2>
+            <p class="text-xs sm:text-sm font-bold mt-1 uppercase">ACTA VOLANTE DE EXÁMENES — ${escapeHtml(state.turno)}</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-y-1.5 gap-x-4 text-xs mb-4">
+            <div class="sm:col-span-12 flex flex-wrap gap-2">
+              <span class="font-bold">CARRERA:</span>
+              <span class="uppercase font-semibold">${escapeHtml(group.carreraNombre)}</span>
+            </div>
+            <div class="sm:col-span-8 flex flex-wrap gap-2">
+              <span class="font-bold">CONDICIÓN DE EXÁMENES:</span>
+              <span class="uppercase font-semibold">${escapeHtml(group.condicion)}</span>
+            </div>
+            <div class="sm:col-span-4 flex flex-wrap gap-2 sm:justify-end">
+              <span class="font-bold">FECHA:</span>
+              <span class="font-semibold">${escapeHtml(group.fechaMesa)}</span>
+            </div>
+            <div class="sm:col-span-12 flex flex-wrap gap-2">
+              <span class="font-bold">${inst.tipo === 'UNIVERSIDAD' ? 'CÁTEDRA / ASIGNATURA:' : 'ESPACIO CURRICULAR / ASIGNATURA:'}</span>
+              <span class="uppercase font-semibold">${escapeHtml(group.materiaNombre)}</span>
+            </div>
+            <div class="sm:col-span-6 flex flex-wrap gap-2">
+              <span class="font-bold">AÑO / CURSO:</span>
+              <span class="font-semibold">${escapeHtml(group.anio)}</span>
+            </div>
+            <div class="sm:col-span-3 flex flex-wrap gap-2 sm:justify-end">
+              <span class="font-bold">Libro:</span>
+              <span>${escapeHtml(meta.libro || '___________')}</span>
+            </div>
+            <div class="sm:col-span-3 flex flex-wrap gap-2 sm:justify-end">
+              <span class="font-bold">Folio:</span>
+              <span>${escapeHtml(meta.folio || '___________')}</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="acta-table w-full border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-slate-900 font-bold text-center">
+                  <th class="py-2 px-1.5 w-10">N° Ord.</th>
+                  <th class="py-2 px-1.5 w-20">Regularizó</th>
+                  <th class="py-2 px-1.5" colspan="2">${escapeHtml(colDocHeader)}</th>
+                  <th class="py-2 px-2 text-left">APELLIDO Y NOMBRES</th>
+                  <th class="py-2 px-1.5 w-16">ESCRITO</th>
+                  <th class="py-2 px-1.5 w-16">ORAL</th>
+                  <th class="py-2 px-1.5 w-36">CALIFICACIÓN DEFINITIVA</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-300 text-xs space-y-5">
+            <div class="flex flex-wrap justify-between gap-4 text-[11px]">
+              <span>Total de alumnos en acta: <strong>${stats.total}</strong></span>
+              <span>Aprobados: <strong>${stats.aprobados}</strong></span>
+              <span>Desaprobados: <strong>${stats.desaprobados}</strong></span>
+              <span>Ausentes: <strong>${stats.ausentes}</strong></span>
+              <span>Lugar y Fecha: <strong>${escapeHtml(inst.localidad || '________________')}</strong>, ${escapeHtml(group.fechaMesa)}</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 pt-8 text-center text-[11px]">
+              <div class="border-t border-slate-800 pt-1.5">
+                <div class="font-semibold">${escapeHtml(meta.vocal1 || 'Vocal 1°')}</div>
+                <div class="text-[10px] text-slate-500">Firma y Aclaración Vocal 1°</div>
+              </div>
+              <div class="border-t border-slate-800 pt-1.5">
+                <div class="font-bold">${escapeHtml(meta.presidente || 'Presidente de Mesa')}</div>
+                <div class="text-[10px] text-slate-500">Firma y Aclaración Presidente</div>
+              </div>
+              <div class="border-t border-slate-800 pt-1.5">
+                <div class="font-semibold">${escapeHtml(meta.vocal2 || 'Vocal 2°')}</div>
+                <div class="text-[10px] text-slate-500">Firma y Aclaración Vocal 2°</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // PESTAÑA 4: CONFIGURACIÓN INSTITUCIONAL Y OFERTA ACADÉMICA
+      // =========================================================================
+      function renderConfigView() {
+        const inst = state.institucion;
+        document.getElementById('cfgTipoInstitucion').value = inst.tipo || 'IES';
+        document.getElementById('cfgInstitucionNombre').value = inst.nombre || '';
+        document.getElementById('cfgJurisdiccion').value = inst.jurisdiccion || '';
+        document.getElementById('cfgLocalidad').value = inst.localidad || '';
+        document.getElementById('cfgTurno').value = state.turno || '';
+        document.getElementById('cfgAreaAdmin').value = inst.areaAdmin || 'Preceptoría';
+        document.getElementById('cfgRenglonesActa').value = inst.renglonesActa || 25;
+        document.getElementById('cfgRequiereLegajo').checked = !!inst.requiereLegajo;
+        document.getElementById('cfgUsaLlamados').checked = !!inst.usaLlamados;
+        document.getElementById('cfgIncluyePromocional').checked = !!inst.incluyePromocional;
+        document.getElementById('cfgPin').value = state.adminPin || '1234';
+
+        const optionsHtml = state.carreras
+          .map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nombre)}</option>`)
+          .join('');
+        const selFilter = document.getElementById('cfgFilterCarrera');
+        const selMatCarrera = document.getElementById('cfgMatCarrera');
+        const prev = selFilter.value;
+        selFilter.innerHTML = optionsHtml;
+        selMatCarrera.innerHTML = optionsHtml;
+        if (prev && state.carreras.some((c) => c.id === prev)) {
+          selFilter.value = prev;
+        }
+        renderCfgMaterias();
+      }
+
+      function renderCfgMaterias() {
+        const carreraId = document.getElementById('cfgFilterCarrera').value;
+        const carrera = state.carreras.find((c) => c.id === carreraId);
+        const container = document.getElementById('cfgMateriasContainer');
+        if (!carrera || carrera.materias.length === 0) {
+          container.innerHTML = `<div class="p-4 text-xs text-slate-400 text-center">No hay materias cargadas en esta carrera.</div>`;
+          return;
+        }
+        container.innerHTML = carrera.materias
+          .map(
+            (m) => `
+            <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50/60 text-xs">
+              <div class="flex-1 min-w-[200px]">
+                <span class="px-2 py-0.5 rounded bg-blue-100 text-[#1e3a8a] font-bold text-[10px] mr-1.5">${escapeHtml(m.anio)}</span>
+                <span class="font-semibold text-slate-800">${escapeHtml(m.nombre)}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" data-edit-mat-fecha="${escapeHtml(m.id)}" data-edit-carrera="${escapeHtml(carrera.id)}" value="${escapeHtml(m.fecha)}" class="w-28 rounded-lg border border-slate-300 px-2 py-1 text-xs text-center font-semibold bg-white" />
+                <button type="button" data-del-mat="${escapeHtml(m.id)}" data-del-carrera="${escapeHtml(carrera.id)}" class="text-red-600 hover:text-red-800 font-semibold px-2 py-1">
+                  ✕
+                </button>
+              </div>
+            </div>
+          `
+          )
+          .join('');
+      }
+
+      function downloadCsv(filename, rows) {
+        const csvContent =
+          '\uFEFF' +
+          rows
+            .map((r) =>
+              r
+                .map((cell) => {
+                  const s = String(cell ?? '').replace(/"/g, '""');
+                  return `"${s}"`;
+                })
+                .join(';')
+            )
+            .join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function switchPresetMode(mode) {
+        state = mode === 'UNIVERSIDAD' ? cloneObj(PRESET_UNIVERSIDAD) : cloneObj(PRESET_IES);
+        selectedMesaKey = '';
+        saveState();
+        applyInstitutionUI();
+        populateInscripcionForm();
+        renderUltimasInscripciones();
+        if (activeTab === 'base') {
+          populateBaseFilters();
+          renderBaseTable();
+        } else if (activeTab === 'actas') {
+          renderActasView();
+        } else if (activeTab === 'config') {
+          renderConfigView();
+        }
+        showToast(
+          mode === 'UNIVERSIDAD'
+            ? '🎓 Modo Universidad activado (con Legajo, 5 años, Cátedras y Llamados).'
+            : '🏛️ Modo Instituto Superior (IES) activado.'
+        );
+      }
+
+      // =========================================================================
+      // EVENT LISTENERS
+      // =========================================================================
+      document.getElementById('btnPresetIES').addEventListener('click', () => switchPresetMode('IES'));
+      document.getElementById('btnPresetUni').addEventListener('click', () => switchPresetMode('UNIVERSIDAD'));
+      document.getElementById('btnConfigPresetIES').addEventListener('click', () => switchPresetMode('IES'));
+      document.getElementById('btnConfigPresetUni').addEventListener('click', () => switchPresetMode('UNIVERSIDAD'));
+
+      // Acceso rápido 1 clic en la barra Demo
+      document.getElementById('btnQuickAdminDemo').addEventListener('click', () => {
+        if (!isAdmin) {
+          isAdmin = true;
+          updateRoleUI();
+          renderUltimasInscripciones();
+          switchTab('actas');
+          showToast(`🔓 Vista ${state.institucion.areaAdmin} activada. Probá las Actas Volantes y la Base de Inscriptos.`);
+        } else {
+          isAdmin = false;
+          updateRoleUI();
+          renderUltimasInscripciones();
+          showToast('👤 Volviste a la Vista Estudiante.');
+        }
+      });
+
+      document.getElementById('btnCustomizeDemo').addEventListener('click', () => {
+        isAdmin = true;
+        updateRoleUI();
+        switchTab('config');
+        showToast('⚙️ Editá el nombre de tu institución y mirá cómo cambia el Acta Volante en vivo.');
+      });
+
+      // Navegación entre pestañas
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          switchTab(btn.getAttribute('data-tab'));
+        });
+      });
+
+      document.getElementById('btnVerTodasEnBase').addEventListener('click', () => {
+        switchTab('base');
+      });
+
+      // Selectores en cascada del formulario
+      document.getElementById('inpCarrera').addEventListener('change', updateAniosForCarrera);
+      document.getElementById('inpAnio').addEventListener('change', updateMateriasForCarreraAnio);
+      document.getElementById('inpMateria').addEventListener('change', updateFechaPreview);
+
+      // Envío de inscripción
+      document.getElementById('formInscripcion').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const carreraId = document.getElementById('inpCarrera').value;
+        const anio = document.getElementById('inpAnio').value;
+        const condicion = document.getElementById('inpCondicion').value;
+        const materiaId = document.getElementById('inpMateria').value;
+        const carrera = state.carreras.find((c) => c.id === carreraId);
+        const materia = carrera ? carrera.materias.find((m) => m.id === materiaId) : null;
+
+        const nombre = document.getElementById('inpNombre').value.trim().toUpperCase();
+        const dni = document.getElementById('inpDni').value.replace(/\D/g, '');
+        const legajo = document.getElementById('inpLegajo').value.trim().toUpperCase();
+        const llamado = document.getElementById('inpLlamado').value;
+        const email = document.getElementById('inpEmail').value.trim();
+        const regularidad = document.getElementById('inpRegularidad').value.trim();
+
+        if (!nombre || !dni || !materia) {
+          showToast('Por favor completá todos los campos obligatorios.', 'error');
+          return;
+        }
+
+        // Evitar duplicados exactos (mismo DNI y misma materia)
+        const duplicado = state.inscripciones.some((x) => x.dni === dni && x.materiaId === materiaId);
+        if (duplicado) {
+          showToast('Este D.N.I. ya se encuentra inscripto en esa materia.', 'error');
+          return;
+        }
+
+        const now = new Date();
+        const fechaReg = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const correlativaInicial = isAdmin
+          ? document.getElementById('inpCorrelativa').value
+          : 'Pendiente';
+
+        const nueva = {
+          id: `INS-${Math.floor(100 + Math.random() * 900)}`,
+          timestamp: fechaReg,
+          email,
+          nombre,
+          dni,
+          legajo: state.institucion.requiereLegajo ? legajo : '',
+          llamado: state.institucion.usaLlamados ? llamado : '1° LLAMADO',
+          regularidad,
+          condicion,
+          carreraId,
+          anio,
+          materiaId,
+          materiaNombre: materia.nombre,
+          fechaMesa: materia.fecha,
+          correlativa: correlativaInicial,
+          escrito: '',
+          oral: '',
+          definitiva: ''
+        };
+
+        state.inscripciones.push(nueva);
+        sessionComprobantes.push(nueva);
+        saveState();
+        updateBadges();
+        renderUltimasInscripciones();
+
+        document.getElementById('inpNombre').value = '';
+        document.getElementById('inpDni').value = '';
+        document.getElementById('inpLegajo').value = '';
+        document.getElementById('inpEmail').value = '';
+        document.getElementById('inpRegularidad').value = '';
+
+        showToast(`✅ Inscripción registrada (${nueva.id}). Comprobante generado.`);
+      });
+
+      // Click para imprimir comprobante individual
+      document.getElementById('ultimasInscripcionesList').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-print-comp]');
+        if (btn) {
+          imprimirComprobanteIndividual(btn.getAttribute('data-print-comp'));
+        }
+      });
+
+      // Filtros de la Base
+      ['fltSearch', 'fltCarrera', 'fltAnio', 'fltCondicion', 'fltCorrelativa'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', renderBaseTable);
+        document.getElementById(id).addEventListener('change', renderBaseTable);
+      });
+
+      // Cambio de correlativas o eliminación en Base
+      document.getElementById('baseTableBody').addEventListener('change', (e) => {
+        const sel = e.target.closest('[data-corr-id]');
+        if (!sel) return;
+        const id = sel.getAttribute('data-corr-id');
+        const ins = state.inscripciones.find((x) => x.id === id);
+        if (ins) {
+          ins.correlativa = sel.value;
+          saveState();
+          updateBadges();
+          renderBaseTable();
+          showToast(
+            ins.correlativa === 'Si'
+              ? `✅ ${ins.nombre} habilitado/a. Ya figura en el Acta Volante.`
+              : `Estado de correlativa actualizado a "${ins.correlativa}".`
+          );
+        }
+      });
+
+      document.getElementById('baseTableBody').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-del-id]');
+        if (!btn) return;
+        const id = btn.getAttribute('data-del-id');
+        state.inscripciones = state.inscripciones.filter((x) => x.id !== id);
+        saveState();
+        updateBadges();
+        renderBaseTable();
+        renderUltimasInscripciones();
+        showToast('Inscripción eliminada.');
+      });
+
+      document.getElementById('btnHabilitarTodosPendientes').addEventListener('click', () => {
+        let count = 0;
+        state.inscripciones.forEach((ins) => {
+          if (ins.correlativa === 'Pendiente') {
+            ins.correlativa = 'Si';
+            count++;
+          }
+        });
+        saveState();
+        updateBadges();
+        renderBaseTable();
+        showToast(count > 0 ? `✅ Se habilitaron ${count} inscripciones pendientes.` : 'No había inscripciones pendientes.');
+      });
+
+      document.getElementById('btnExportarBaseCsv').addEventListener('click', () => {
+        const rows = [
+          ['ID', 'Fecha Registro', 'Apellido y Nombre', 'DNI', 'Legajo', 'Email', 'Carrera', 'Año', 'Materia', 'Fecha Mesa', 'Condición', 'Regularidad', 'Correlativa', 'Escrito', 'Oral', 'Definitiva']
+        ];
+        getFilteredInscripciones().forEach((ins) => {
+          rows.push([
+            ins.id,
+            ins.timestamp,
+            ins.nombre,
+            ins.dni,
+            ins.legajo || '',
+            ins.email,
+            getCarreraNombre(ins.carreraId),
+            ins.anio,
+            ins.materiaNombre,
+            ins.fechaMesa,
+            ins.condicion,
+            ins.regularidad,
+            ins.correlativa,
+            ins.escrito,
+            ins.oral,
+            ins.definitiva
+          ]);
+        });
+        downloadCsv('base_inscripciones_mesas.csv', rows);
+      });
+
+      // Controles de Actas Volantes
+      document.getElementById('selActaMesa').addEventListener('change', (e) => {
+        selectedMesaKey = e.target.value;
+        renderActasView();
+      });
+
+      ['inpLibro', 'inpFolio', 'inpPresidente', 'inpVocal1', 'inpVocal2'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', () => {
+          if (!selectedMesaKey) return;
+          if (!state.actasMeta[selectedMesaKey]) state.actasMeta[selectedMesaKey] = {};
+          state.actasMeta[selectedMesaKey].libro = document.getElementById('inpLibro').value.trim();
+          state.actasMeta[selectedMesaKey].folio = document.getElementById('inpFolio').value.trim();
+          state.actasMeta[selectedMesaKey].presidente = document.getElementById('inpPresidente').value.trim();
+          state.actasMeta[selectedMesaKey].vocal1 = document.getElementById('inpVocal1').value.trim();
+          state.actasMeta[selectedMesaKey].vocal2 = document.getElementById('inpVocal2').value.trim();
+          saveState();
+          const groups = getActasGroups();
+          const grp = groups.find((g) => g.key === selectedMesaKey);
+          if (grp) renderPrintableActa(grp, state.actasMeta[selectedMesaKey]);
+        });
+      });
+
+      document.getElementById('chkRellenarRenglones').addEventListener('change', () => {
+        renderActasView();
+      });
+
+      // Carga de notas en el Acta Volante
+      document.getElementById('actaPrintable').addEventListener('input', (e) => {
+        const inp = e.target.closest('[data-grade-id]');
+        if (!inp) return;
+        const id = inp.getAttribute('data-grade-id');
+        const field = inp.getAttribute('data-grade-field');
+        const al = state.inscripciones.find((x) => x.id === id);
+        if (al) {
+          al[field] = inp.value.trim().toUpperCase();
+          saveState();
+          const groups = getActasGroups();
+          const grp = groups.find((g) => g.key === selectedMesaKey);
+          if (grp) {
+            const stats = computeStats(grp.alumnos);
+            document.getElementById('actaStatsBar').innerHTML = `
+              <span class="text-slate-700">Inscriptos Habilitados: <strong>${stats.total}</strong></span>
+              <span class="text-emerald-700">Aprobados: <strong>${stats.aprobados}</strong></span>
+              <span class="text-red-700">Desaprobados: <strong>${stats.desaprobados}</strong></span>
+              <span class="text-amber-700">Ausentes: <strong>${stats.ausentes}</strong></span>
+            `;
+          }
+        }
+      });
+
+      document.getElementById('actaPrintable').addEventListener('change', (e) => {
+        if (e.target.closest('[data-grade-id]')) {
+          renderActasView();
+        }
+      });
+
+      document.getElementById('actaPrintable').addEventListener('click', (e) => {
+        const btnAus = e.target.closest('[data-mark-ausente]');
+        if (!btnAus) return;
+        const id = btnAus.getAttribute('data-mark-ausente');
+        const al = state.inscripciones.find((x) => x.id === id);
+        if (al) {
+          al.escrito = '-';
+          al.oral = '-';
+          al.definitiva = 'AUSENTE';
+          saveState();
+          renderActasView();
+        }
+      });
+
+      document.getElementById('btnImprimirActa').addEventListener('click', () => {
+        window.print();
+      });
+
+      document.getElementById('btnExportarActaCsv').addEventListener('click', () => {
+        const groups = getActasGroups();
+        const grp = groups.find((g) => g.key === selectedMesaKey);
+        if (!grp) return;
+        const rows = [
+          ['Orden', 'Regularizó', 'DNI', 'Legajo', 'Apellido y Nombres', 'Examen Escrito', 'Examen Oral', 'Calificación Definitiva', 'En Letras']
+        ];
+        grp.alumnos.forEach((al, idx) => {
+          rows.push([
+            idx + 1,
+            al.regularidad || '',
+            al.dni,
+            al.legajo || '',
+            al.nombre,
+            al.escrito,
+            al.oral,
+            al.definitiva,
+            notaEnLetras(al.definitiva)
+          ]);
+        });
+        downloadCsv(`acta_${grp.materiaId}.csv`, rows);
+      });
+
+      // Guardar Configuración Multi-Institución
+      document.getElementById('btnGuardarInstitucion').addEventListener('click', () => {
+        const nombre = document.getElementById('cfgInstitucionNombre').value.trim();
+        if (!nombre) {
+          showToast('El nombre de la institución no puede estar vacío.', 'error');
+          return;
+        }
+        state.institucion.tipo = document.getElementById('cfgTipoInstitucion').value;
+        state.institucion.nombre = nombre;
+        state.institucion.nombreCorto = nombre;
+        state.institucion.jurisdiccion = document.getElementById('cfgJurisdiccion').value.trim();
+        state.institucion.localidad = document.getElementById('cfgLocalidad').value.trim();
+        state.turno = document.getElementById('cfgTurno').value.trim().toUpperCase() || state.turno;
+        state.institucion.areaAdmin = document.getElementById('cfgAreaAdmin').value;
+        state.institucion.renglonesActa = parseInt(document.getElementById('cfgRenglonesActa').value, 10) || 25;
+        state.institucion.requiereLegajo = document.getElementById('cfgRequiereLegajo').checked;
+        state.institucion.usaLlamados = document.getElementById('cfgUsaLlamados').checked;
+        state.institucion.incluyePromocional = document.getElementById('cfgIncluyePromocional').checked;
+        state.adminPin = document.getElementById('cfgPin').value.trim() || '1234';
+
+        saveState();
+        applyInstitutionUI();
+        populateInscripcionForm();
+        showToast('✅ Configuración institucional actualizada en todo el sistema y en el Acta Volante.');
+      });
+
+      document.getElementById('cfgFilterCarrera').addEventListener('change', renderCfgMaterias);
+
+      document.getElementById('btnAgregarCarrera').addEventListener('click', () => {
+        const nom = document.getElementById('inpNuevaCarrera').value.trim().toUpperCase();
+        if (!nom) return;
+        const id = 'car_' + Date.now();
+        state.carreras.push({ id, nombre: nom, materias: [] });
+        document.getElementById('inpNuevaCarrera').value = '';
+        saveState();
+        renderConfigView();
+        populateInscripcionForm();
+        showToast('✅ Carrera agregada.');
+      });
+
+      document.getElementById('btnAgregarMateria').addEventListener('click', () => {
+        const cId = document.getElementById('cfgMatCarrera').value;
+        const anio = document.getElementById('cfgMatAnio').value;
+        const fecha = document.getElementById('cfgMatFecha').value.trim() || 'A confirmar';
+        const nombre = document.getElementById('cfgMatNombre').value.trim();
+        if (!cId || !nombre) {
+          showToast('Completá el nombre de la materia.', 'error');
+          return;
+        }
+        const carrera = state.carreras.find((c) => c.id === cId);
+        if (carrera) {
+          carrera.materias.push({
+            id: 'mat_' + Date.now(),
+            anio,
+            nombre,
+            fecha
+          });
+          document.getElementById('cfgMatNombre').value = '';
+          document.getElementById('cfgMatFecha').value = '';
+          saveState();
+          renderCfgMaterias();
+          populateInscripcionForm();
+          showToast('✅ Materia y fecha agregadas.');
+        }
+      });
+
+      document.getElementById('cfgMateriasContainer').addEventListener('change', (e) => {
+        const inp = e.target.closest('[data-edit-mat-fecha]');
+        if (!inp) return;
+        const matId = inp.getAttribute('data-edit-mat-fecha');
+        const cId = inp.getAttribute('data-edit-carrera');
+        const carrera = state.carreras.find((c) => c.id === cId);
+        const mat = carrera ? carrera.materias.find((m) => m.id === matId) : null;
+        if (mat) {
+          mat.fecha = inp.value.trim();
+          saveState();
+          populateInscripcionForm();
+          showToast('📅 Fecha de mesa actualizada.');
+        }
+      });
+
+      document.getElementById('cfgMateriasContainer').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-del-mat]');
+        if (!btn) return;
+        const matId = btn.getAttribute('data-del-mat');
+        const cId = btn.getAttribute('data-del-carrera');
+        const carrera = state.carreras.find((c) => c.id === cId);
+        if (carrera) {
+          carrera.materias = carrera.materias.filter((m) => m.id !== matId);
+          saveState();
+          renderCfgMaterias();
+          populateInscripcionForm();
+          showToast('Materia eliminada.');
+        }
+      });
+
+      document.getElementById('btnExportJson').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'respaldo_sistema_mesas.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('btnResetDemo').addEventListener('click', () => {
+        switchPresetMode(state.institucion.tipo === 'UNIVERSIDAD' ? 'UNIVERSIDAD' : 'IES');
+      });
+
+      // Modal de acceso administrativo
+      document.getElementById('btnToggleAdminModal').addEventListener('click', () => {
+        if (isAdmin) {
+          isAdmin = false;
+          updateRoleUI();
+          renderUltimasInscripciones();
+          showToast('Sesión administrativa cerrada.');
+        } else {
+          document.getElementById('adminModal').classList.remove('hidden');
+          document.getElementById('inpAdminPin').focus();
+        }
+      });
+
+      function closeAdminModal() {
+        document.getElementById('adminModal').classList.add('hidden');
+        document.getElementById('inpAdminPin').value = '';
+      }
+
+      document.getElementById('btnCloseAdminModal').addEventListener('click', closeAdminModal);
+      document.getElementById('btnCancelAdminModal').addEventListener('click', closeAdminModal);
+
+      document.getElementById('formAdminLogin').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pin = document.getElementById('inpAdminPin').value.trim();
+        if (pin === (state.adminPin || '1234') || pin === '1234' || pin === '9009') {
+          isAdmin = true;
+          closeAdminModal();
+          updateRoleUI();
+          renderUltimasInscripciones();
+          switchTab('base');
+          showToast(`🔓 Acceso ${state.institucion.areaAdmin} habilitado.`);
+        } else {
+          showToast('Clave incorrecta. En modo Demo usá 1234 o 9009.', 'error');
+        }
+      });
+
+      // Inicialización
+      applyInstitutionUI();
+      populateInscripcionForm();
+      renderUltimasInscripciones();
+    })();
+  </script>
+</body>
+</html>
