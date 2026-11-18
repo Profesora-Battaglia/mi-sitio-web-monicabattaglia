@@ -2,6 +2,7 @@
 
 > Sitio oficial: https://monicabattaglia.com
 > Aplicación con IA para docentes: https://app.monicabattaglia.com (Landing informativa: https://monicabattaglia.com/claseiaxpress)
+> Generador IA para Moodle (SCORM, H5P, XML, GIFT): https://monicabattaglia.com/moodle-ai-creator-app
 > Campus Virtual de Cursos: https://campus.monicabattaglia.com
 > Ubicación: Tupungato, Valle de Uco, Mendoza, Argentina (Atención online a docentes e instituciones educativas de toda Argentina y Latinoamérica).
 > Contacto: meb@monicabattaglia.com | WhatsApp: +54 9 262 266-2596
@@ -16,6 +17,11 @@ Aplicación web creada para que docentes de Argentina ahorren hasta 10 horas sem
   - **Plan Inicial ($0 / siempre gratis)**: 3 generaciones de prueba en total, acceso al ChatBot Pedagógico y 1 descarga de muestra en Word (.doc).
   - **Plan Docente Pro ($15.000 ARS / mes)**: Generaciones y descargas ilimitadas en Word y PDF, secuencias didácticas, rúbricas, cuestionarios con solucionario, actos escolares e historial.
   - **Plan Docente Experto ($30.000 ARS / mes)**: Módulo Avanzado de Inclusión (PPI y DUA), exámenes con múltiples variantes (Tema 1 y 2), informes cualitativos de trayectorias, proyectos ABP interdisciplinarios y soporte prioritario por WhatsApp con Mónica.
+
+## MoodleAI Creator (Actividades Interactivas, SCORM y H5P para Moodle)
+Aplicación web para transformar contenidos educativos en actividades interactivas, evaluaciones calificables y paquetes válidos Moodle XML, GIFT, SCORM 1.2/2004 y H5P en pocos minutos con Inteligencia Artificial.
+- **URL**: https://monicabattaglia.com/moodle-ai-creator-app
+- **Planes (Pago en ARS con Mercado Pago)**: $0, $25.000 y $50.000 ARS/mes.
 
 ## Recursos Gratuitos Destacados para Docentes
 - [Centro de Recursos Docentes](https://monicabattaglia.com/recursos-para-docentes): Descargas gratuitas, checklists, guías de accesibilidad y herramientas interactivas.

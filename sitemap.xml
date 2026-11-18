@@ -11,6 +11,11 @@
     <priority>0.95</priority>
   </url>
   <url>
+    <loc>https://monicabattaglia.com/moodle-ai-creator-app</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://monicabattaglia.com/recursos-para-docentes</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
