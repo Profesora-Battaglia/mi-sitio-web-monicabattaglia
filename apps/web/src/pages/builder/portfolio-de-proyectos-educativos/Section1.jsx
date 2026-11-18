@@ -1,9 +1,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, BookOpen, Smartphone, FileText, Gamepad2, Check } from 'lucide-react';
+import { ArrowRight, Building2, BookOpen, Smartphone, FileText, Gamepad2, GraduationCap, Check } from 'lucide-react';
 import Reveal from '@/components/Reveal';
 
 const projects = [
+	{
+		icon: GraduationCap,
+		title: 'MoodleAI Creator (Actividades, SCORM y H5P con IA)',
+		description:
+			'Plataforma SaaS EdTech que permite a docentes transformar contenidos educativos en actividades interactivas, evaluaciones calificables y paquetes listos para incorporar en Moodle (Moodle XML, GIFT, SCORM 1.2/2004 y H5P válidos).',
+		features: [
+			'12 tipos de actividades y generador de evaluaciones',
+			'Exportación Moodle XML, GIFT, SCORM 1.2/2004 y H5P',
+			'Fundamentación con Taxonomía de Bloom y DUA',
+			'Simulador interactivo, editor visual y biblioteca personal',
+		],
+		impact: [
+			'Recursos digitales para Moodle en pocos minutos',
+			'Sin necesidad de conocimientos de programación',
+			'Retroalimentación formativa y calificación automática',
+			'Paquetes H5P y SCORM con estructura técnica validada',
+		],
+		cta: { text: 'Abrir MoodleAI Creator y probar Demo', href: '/moodle-ai-creator-app' },
+		image:
+			'https://horizons-cdn.hostinger.com/8899df02-63ad-48bb-b79f-af29dfcdaf65/gemini_generated_image_ebw73cebw73cebw7-convertido-de-png-vUN5x8yIzASpKOGD.webp?width=768&fit=crop',
+		alt: 'Plataforma MoodleAI Creator mostrando el generador de actividades interactivas y exportación a Moodle XML, SCORM y H5P',
+	},
 	{
 		icon: BookOpen,
 		title: 'Libro de Temas Digital (Multi-Institución)',

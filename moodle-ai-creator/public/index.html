@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodleAI Creator — Plataforma Docente de Actividades y Recursos para Moodle</title>
+  <meta name="description" content="Transformá contenidos educativos en actividades interactivas, evaluaciones y paquetes Moodle XML, GIFT, SCORM y H5P en pocos minutos con Inteligencia Artificial." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.local.js" onerror="window.__MOODLEAI_CONFIG__ = window.__MOODLEAI_CONFIG__ || {};"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Encabezado Móvil -->
+  <header class="mobile-header" aria-label="Barra superior móvil">
+    <div class="brand-compact">
+      <span class="brand-logo" aria-hidden="true">🎓</span>
+      <div>
+        <span class="brand-title">MoodleAI Creator</span>
+        <span class="brand-badge">EdTech SaaS</span>
+      </div>
+    </div>
+    <button id="mobile-menu-toggle" class="btn-icon" aria-label="Abrir menú de navegación" aria-expanded="false">
+      ☰ Menú
+    </button>
+  </header>
+
+  <div class="app-layout">
+    <!-- Navegación Lateral (Módulo 8) -->
+    <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-brand">
+        <div class="brand-icon" aria-hidden="true">🎓</div>
+        <div>
+          <h1 class="brand-name">MoodleAI Creator</h1>
+          <p class="brand-subtitle">Diseño Instruccional + Moodle</p>
+        </div>
+      </div>
+
+      <!-- Tarjeta resumida del Docente en la barra lateral -->
+      <div class="sidebar-teacher-card" id="sidebar-teacher-card">
+        <div class="avatar-circle" id="sidebar-avatar">MB</div>
+        <div class="teacher-meta">
+          <p class="teacher-name" id="sidebar-teacher-name">Cargando...</p>
+          <p class="teacher-plan" id="sidebar-teacher-plan">Plan Gratuito ($0 ARS)</p>
+        </div>
+      </div>
+
+      <!-- Barra de cuota mensual del plan (Módulo 7) -->
+      <div class="quota-box" aria-live="polite">
+        <div class="quota-header">
+          <span>Generaciones del mes</span>
+          <strong id="sidebar-quota-text">0 / 3</strong>
+        </div>
+        <div class="quota-progress-bg" role="progressbar" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="sidebar-quota-bar-container">
+          <div class="quota-progress-fill" id="sidebar-quota-fill" style="width: 0%"></div>
+        </div>
+        <p class="quota-helper" id="sidebar-quota-helper">Disponibles en tu plan actual</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Secciones de la plataforma">
+        <button type="button" class="nav-item active" data-view="dashboard">
+          <span class="nav-icon" aria-hidden="true">📊</span>
+          <span>Panel Principal</span>
+        </button>
+        <button type="button" class="nav-item" data-view="generator">
+          <span class="nav-icon" aria-hidden="true">✨</span>
+          <span>Generador de Actividades</span>
+        </button>
+        <button type="button" class="nav-item" data-view="evaluations">
+          <span class="nav-icon" aria-hidden="true">📝</span>
+          <span>Generador de Evaluaciones</span>
+        </button>
+        <button type="button" class="nav-item" data-view="preview">
+          <span class="nav-icon" aria-hidden="true">👁️</span>
+          <span>Vista Previa, Editor y Exportar</span>
+        </button>
+        <button type="button" class="nav-item" data-view="library">
+          <span class="nav-icon" aria-hidden="true">📚</span>
+          <span>Biblioteca Personal</span>
+        </button>
+        <button type="button" class="nav-item" data-view="tutorials">
+          <span class="nav-icon" aria-hidden="true">💡</span>
+          <span>Tutoriales y Pedagogía</span>
+        </button>
+        <button type="button" class="nav-item" data-view="profile">
+          <span class="nav-icon" aria-hidden="true">💳</span>
+          <span>Planes (ARS), Mercado Pago y Cuenta</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="ai-status-pill" id="ai-status-pill">
+          <span class="status-dot"></span>
+          <span id="ai-status-text">Motor IA Listo</span>
+        </div>
+        <a href="../" style="display:block;margin-top:10px;font-size:0.78rem;color:#94a3b8;text-decoration:none;text-align:center;">
+          &larr; Volver al sitio principal
+        </a>
+      </div>
+    </aside>
+
+    <!-- Área Principal de Contenido -->
+    <main id="main-content" class="main-content" tabindex="-1">
+      <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+      <!-- Modal de Pasarela de Pagos Mercado Pago en Pesos Argentinos (ARS) -->
+      <div id="mp-checkout-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:3000;align-items:center;justify-content:center;padding:16px;">
+        <div class="panel-card" style="max-width:540px;width:100%;border:2px solid #009ee3;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#009ee3;color:#fff;font-weight:800;padding:6px 12px;border-radius:8px;font-size:0.85rem;">Mercado Pago · ARS</span>
+              <h3 id="mp-modal-title" style="font-size:1.1rem;">Suscripción en Pesos Argentinos</h3>
+            </div>
+            <button type="button" id="btn-close-mp-modal" class="btn btn-sm btn-outline">✕</button>
+          </div>
+
+          <div id="mp-modal-body" style="margin-top:14px;font-size:0.92rem;display:flex;flex-direction:column;gap:10px;">
+            <!-- Se completa dinámicamente con el detalle de la preferencia o link de Mercado Pago -->
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid #e2e8f0;">
+            <a id="btn-open-external-mp" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="display:none;border-color:#009ee3;color:#0284c7;">
+              🔗 Abrir Link Externo de Mercado Pago
+            </a>
+            <button type="button" id="btn-confirm-mp-payment" class="btn btn-primary" style="background:#009ee3;">
+              ✅ Acreditar Pago en ARS y Activar Plan Ahora
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 1: PANEL PRINCIPAL / DASHBOARD (Módulo 1)                  -->
+      <!-- ================================================================ -->
+      <section id="view-dashboard" class="view-section active" aria-labelledby="dashboard-heading">
+        <div class="hero-welcome">
+          <div class="hero-welcome-text">
+            <span class="eyebrow-badge">Panel Principal Docente</span>
+            <h2 id="dashboard-heading">¡Hola, <span id="welcome-teacher-name">Docente</span>! 👋</h2>
+            <p id="welcome-teacher-subtitle">
+              Transformá cualquier contenido curricular en actividades interactivas, cuestionarios y paquetes listos para Moodle en pocos minutos.
+            </p>
+            <div class="hero-actions">
+              <button type="button" class="btn btn-primary" data-goto-view="generator">
+                ✨ Crear Nueva Actividad con IA
+              </button>
+              <button type="button" class="btn btn-secondary" data-goto-view="evaluations">
+                📝 Crear Evaluación Calificable
+              </button>
+              <button type="button" class="btn btn-outline" data-goto-view="profile">
+                💳 Ver Planes en ARS (Mercado Pago)
+              </button>
+            </div>
+          </div>
+          <div class="hero-quick-tip" role="note" aria-label="Consejo pedagógico del día">
+            <div class="tip-badge">🎯 Recomendación DUA y Moodle</div>
+            <h3>Combiná retroalimentación formativa con intentos múltiples</h3>
+            <p>
+              Configurar 2 intentos en Moodle con pistas formativas aumenta hasta un 40% la comprensión autónoma del estudiante sin requerir corrección manual.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats-grid" aria-label="Resumen de actividad docente">
+          <article class="stat-card">
+            <div class="stat-icon stat-blue" aria-hidden="true">📄</div>
+            <div>
+              <p class="stat-label">Actividades Creadas</p>
+              <p class="stat-value" id="stat-total-activities">0</p>
+              <p class="stat-caption">En tu biblioteca personal</p>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon stat-orange" aria-hidden="true">✅</div>
+            <div>
+              <p class="stat-label">Evaluaciones Configuradas</p>
+              <p class="stat-value" id="stat-total-evaluations">0</p>
+              <p class="stat-caption">Con calificación y puntaje</p>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon stat-amber" aria-hidden="true">⭐</div>
+            <div>
+              <p class="stat-label">Recursos Guardados</p>
+              <p class="stat-value" id="stat-total-favorites">0</p>
+              <p class="stat-caption">Marcados como favoritos</p>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon stat-green" aria-hidden="true">📦</div>
+            <div>
+              <p class="stat-label">Exportaciones Moodle</p>
+              <p class="stat-value" id="stat-total-exports">0</p>
+              <p class="stat-caption">XML, GIFT, SCORM y H5P</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-card-header">
+            <div>
+              <h3>🚀 Acceso rápido a crear actividades</h3>
+              <p class="text-muted">Elegí un formato pedagógico para abrir el generador con ese tipo preseleccionado:</p>
+            </div>
+          </div>
+          <div class="quick-types-grid" id="quick-activity-types"></div>
+        </div>
+
+        <div class="dashboard-columns">
+          <div class="panel-card">
+            <div class="panel-card-header">
+              <div>
+                <h3>🕒 Actividades recientes</h3>
+                <p class="text-muted">Tus últimos recursos generados o editados, listos para previsualizar, editar o descargar.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" data-goto-view="library">Ver todas</button>
+            </div>
+            <div id="dashboard-recent-list" class="activity-list"></div>
+          </div>
+
+          <div class="dashboard-side-stack">
+            <div class="panel-card">
+              <div class="panel-card-header">
+                <div>
+                  <h3>⭐ Recursos guardados (Favoritos)</h3>
+                  <p class="text-muted">Acceso directo a tus actividades destacadas.</p>
+                </div>
+              </div>
+              <div id="dashboard-favorites-list" class="favorites-list"></div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-card-header">
+                <div>
+                  <h3>👩‍🏫 Perfil del docente y Plan</h3>
+                  <p class="text-muted">Tus datos institucionales y suscripción en ARS.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" data-goto-view="profile">Planes y Cuenta</button>
+              </div>
+              <div id="dashboard-profile-summary" class="profile-summary-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-card-header">
+            <div>
+              <h3>💡 Tutoriales rápidos y recomendaciones para Moodle</h3>
+              <p class="text-muted">Guías prácticas para importar tus recursos en Moodle sin conocimientos técnicos.</p>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" data-goto-view="tutorials">Ver guía completa</button>
+          </div>
+          <div class="tutorials-grid">
+            <article class="tutorial-card">
+              <span class="tutorial-tag tag-xml">Moodle Nativo (XML / GIFT)</span>
+              <h4>¿Cómo importar preguntas al Banco de Preguntas?</h4>
+              <ol>
+                <li>En tu curso de Moodle, abrí <strong>Más &rarr; Banco de preguntas &rarr; Importar</strong>.</li>
+                <li>Elegí <strong>Formato Moodle XML</strong> o <strong>Formato GIFT</strong>.</li>
+                <li>Arrastrá el archivo descargado desde MoodleAI Creator y hacé clic en <strong>Importar</strong>.</li>
+              </ol>
+            </article>
+            <article class="tutorial-card">
+              <span class="tutorial-tag tag-scorm">Paquete SCORM 1.2 / 2004</span>
+              <h4>¿Cómo subir una actividad SCORM con nota automática?</h4>
+              <ol>
+                <li>Activá el <strong>Modo de edición</strong> en tu aula Moodle.</li>
+                <li>Hacé clic en <strong>Añadir una actividad o un recurso &rarr; Paquete SCORM</strong>.</li>
+                <li>Subí el archivo <code>.zip</code> descargado y guardá los cambios. ¡Registra progreso y nota solo!</li>
+              </ol>
+            </article>
+            <article class="tutorial-card">
+              <span class="tutorial-tag tag-h5p">Contenido Interactivo H5P</span>
+              <h4>¿Cómo cargar un paquete .h5p válido en Moodle?</h4>
+              <ol>
+                <li>En tu aula Moodle, entrá a <strong>Banco de contenido &rarr; Subir</strong> o añadí una actividad <strong>H5P</strong>.</li>
+                <li>Cargá el archivo <code>.h5p</code> generado por MoodleAI Creator.</li>
+                <li>Moodle validará el manifiesto <code>h5p.json</code> y mostrará la actividad interactiva.</li>
+              </ol>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 2: GENERADOR INTELIGENTE DE ACTIVIDADES (Módulos 2 y 6)    -->
+      <!-- ================================================================ -->
+      <section id="view-generator" class="view-section" aria-labelledby="generator-heading">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow-badge">Módulos 2 y 6 • Diseño Instruccional con IA</span>
+            <h2 id="generator-heading">✨ Generador Inteligente de Actividades</h2>
+            <p class="text-muted">Completá los 8 parámetros pedagógicos de tu clase. La IA estructurará la actividad aplicando Taxonomía de Bloom, aprendizaje activo, DUA y retroalimentación formativa.</p>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="contextual-help" role="note">
+            <strong>💡 Ayuda contextual para docentes:</strong> Cuanto más específico sea tu <em>Tema</em> y tu <em>Objetivo de aprendizaje</em>, más precisas y contextualizadas serán las preguntas. Luego de generarla podrás probarla y editar cualquier texto antes de exportarla a Moodle.
+          </div>
+
+          <form id="activity-generator-form" class="form-grid">
+            <div class="form-group">
+              <label for="gen-subject">1. Asignatura o Espacio Curricular *</label>
+              <input type="text" id="gen-subject" name="subject" required placeholder="Ej.: Ciencias Naturales, Historia, Matemática, Lengua..." value="Ciencias Naturales / Biología" />
+            </div>
+
+            <div class="form-group">
+              <label for="gen-level">2. Nivel Educativo *</label>
+              <select id="gen-level" name="education_level" required>
+                <option value="Primaria">Educación Primaria</option>
+                <option value="Secundaria" selected>Educación Secundaria</option>
+                <option value="Universidad">Educación Superior / Universidad</option>
+                <option value="Capacitación">Capacitación Profesional / Corporativa</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="gen-age">3. Edad de los estudiantes *</label>
+              <input type="text" id="gen-age" name="student_age" required placeholder="Ej.: 13 a 15 años, 9-10 años, Adultos..." value="13 a 15 años" />
+            </div>
+
+            <div class="form-group">
+              <label for="gen-duration">6. Duración estimada (minutos) *</label>
+              <input type="number" id="gen-duration" name="estimated_duration" min="5" max="240" required value="30" />
+            </div>
+
+            <div class="form-group form-col-span-2">
+              <label for="gen-topic">4. Tema o contenido a trabajar *</label>
+              <input type="text" id="gen-topic" name="topic" required placeholder="Ej.: Ecosistemas y redes tróficas, Revolución de Mayo, Fracciones equivalentes..." value="Ciclo del agua y conservación de cuencas hídricas en Mendoza" />
+            </div>
+
+            <div class="form-group form-col-span-2">
+              <label for="gen-objective">5. Objetivo de aprendizaje *</label>
+              <textarea id="gen-objective" name="learning_objective" rows="2" required placeholder="¿Qué esperás que logren comprender, analizar o resolver tus estudiantes?">Comprender las etapas del ciclo hidrológico y analizar la importancia del cuidado del recurso hídrico en zonas áridas y de montaña.</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="gen-difficulty">7. Nivel de dificultad *</label>
+              <select id="gen-difficulty" name="difficulty" required>
+                <option value="Básico">Básico (Reconocimiento y comprensión inicial)</option>
+                <option value="Intermedio" selected>Intermedio (Aplicación y análisis de relaciones)</option>
+                <option value="Avanzado">Avanzado (Evaluación crítica y resolución compleja)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="gen-type">8. Tipo de actividad (12 formatos disponibles) *</label>
+              <select id="gen-type" name="activity_type" required>
+                <option value="Opción múltiple">Opción múltiple</option>
+                <option value="Verdadero o falso">Verdadero o falso</option>
+                <option value="Completar espacios">Completar espacios</option>
+                <option value="Relacionar columnas">Relacionar columnas</option>
+                <option value="Ordenar secuencias">Ordenar secuencias</option>
+                <option value="Preguntas abiertas">Preguntas abiertas</option>
+                <option value="Cuestionarios">Cuestionarios (Mixto)</option>
+                <option value="Crucigramas">Crucigramas</option>
+                <option value="Sopa de letras">Sopa de letras</option>
+                <option value="Casos prácticos">Casos prácticos (ABP)</option>
+                <option value="Actividades de reflexión">Actividades de reflexión</option>
+                <option value="Gamificación">Gamificación (Misión / Desafío)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="gen-question-count">Cantidad de consignas / preguntas a generar</label>
+              <input type="number" id="gen-question-count" name="question_count" min="1" max="15" value="4" required />
+            </div>
+
+            <div class="form-group">
+              <label for="gen-tags">Etiquetas para tu Biblioteca (opcional)</label>
+              <input type="text" id="gen-tags" name="tags" placeholder="Ej.: unidad 2, agua, mendoza, formativa" />
+            </div>
+
+            <div class="form-actions form-col-span-2">
+              <button type="button" class="btn btn-outline" data-goto-view="preview">
+                👁️ Ver Última Actividad Cargada
+              </button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-generator">
+                ✨ Generar Actividad con IA Ahora
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 3: GENERADOR DE EVALUACIONES (Módulo 3)                    -->
+      <!-- ================================================================ -->
+      <section id="view-evaluations" class="view-section" aria-labelledby="evaluations-heading">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow-badge">Módulo 3 • Evaluación Formativa y Sumativa</span>
+            <h2 id="evaluations-heading">📝 Generador de Evaluaciones Configurables</h2>
+            <p class="text-muted">Diseñá exámenes y cuestionarios con puntaje por pregunta, tiempo límite, intentos permitidos, retroalimentación y calificación automática para Moodle.</p>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="contextual-help" role="note">
+            <strong>💡 Consejo para Evaluaciones en Moodle:</strong> Las preguntas de opción múltiple, verdadero/falso, completar espacios y relacionar columnas incluyen <strong>calificación automática</strong> lista para el Libro de Calificaciones de Moodle.
+          </div>
+
+          <form id="evaluation-generator-form" class="form-grid">
+            <div class="form-group">
+              <label for="eval-subject">Asignatura *</label>
+              <input type="text" id="eval-subject" required value="Historia Argentina" />
+            </div>
+            <div class="form-group">
+              <label for="eval-level">Nivel Educativo *</label>
+              <select id="eval-level" required>
+                <option value="Primaria">Educación Primaria</option>
+                <option value="Secundaria" selected>Educación Secundaria</option>
+                <option value="Universidad">Educación Superior / Universidad</option>
+                <option value="Capacitación">Capacitación Profesional</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="eval-age">Edad de los estudiantes *</label>
+              <input type="text" id="eval-age" required value="14 a 16 años" />
+            </div>
+            <div class="form-group">
+              <label for="eval-type">Formato de Evaluación *</label>
+              <select id="eval-type" required>
+                <option value="Cuestionarios" selected>Cuestionario Mixto (Opción múltiple, V/F, Espacios, Relacionar)</option>
+                <option value="Opción múltiple">Examen de Opción Múltiple</option>
+                <option value="Verdadero o falso">Examen Verdadero o Falso</option>
+                <option value="Completar espacios">Evaluación de Completar Espacios</option>
+                <option value="Relacionar columnas">Evaluación de Relacionar Columnas</option>
+                <option value="Casos prácticos">Evaluación por Caso Práctico (ABP)</option>
+              </select>
+            </div>
+
+            <div class="form-group form-col-span-2">
+              <label for="eval-topic">Tema o Unidad a Evaluar *</label>
+              <input type="text" id="eval-topic" required value="Revolución de Mayo de 1810 y formación de la Primera Junta" />
+            </div>
+
+            <div class="form-group form-col-span-2">
+              <label for="eval-objective">Objetivo / Criterio de Evaluación *</label>
+              <textarea id="eval-objective" rows="2" required>Evaluar la comprensión de las causas políticas, económicas y sociales de la Revolución de Mayo y el rol del Cabildo Abierto del 22 de mayo.</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="eval-count">Cantidad de preguntas *</label>
+              <input type="number" id="eval-count" min="1" max="20" value="5" required />
+            </div>
+            <div class="form-group">
+              <label for="eval-difficulty">Nivel de dificultad *</label>
+              <select id="eval-difficulty" required>
+                <option value="Básico">Básico</option>
+                <option value="Intermedio" selected>Intermedio</option>
+                <option value="Avanzado">Avanzado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="eval-points">Puntaje por pregunta *</label>
+              <input type="number" id="eval-points" min="0.5" max="100" step="0.5" value="2.0" required />
+            </div>
+            <div class="form-group">
+              <label for="eval-time">Tiempo disponible (minutos) *</label>
+              <input type="number" id="eval-time" min="5" max="180" value="30" required />
+            </div>
+            <div class="form-group">
+              <label for="eval-attempts">Intentos permitidos en Moodle *</label>
+              <select id="eval-attempts">
+                <option value="1">1 intento (Evaluación sumativa estricta)</option>
+                <option value="2" selected>2 intentos (Evaluación formativa recomendada)</option>
+                <option value="3">3 intentos</option>
+                <option value="0">Sin límite de intentos (Autoevaluación)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="eval-autograde">Calificación automática</label>
+              <select id="eval-autograde">
+                <option value="true" selected>Activada (Califica automáticamente al entregar)</option>
+                <option value="false">Revisión manual del docente</option>
+              </select>
+            </div>
+
+            <div class="form-actions form-col-span-2">
+              <button type="submit" class="btn btn-primary" id="btn-submit-evaluation">
+                📝 Generar Evaluación Calificable con IA
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 4: VISTA PREVIA INTERACTIVA, EDITOR Y EXPORTACIÓN MOODLE   -->
+      <!-- ================================================================ -->
+      <section id="view-preview" class="view-section" aria-labelledby="preview-heading">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <span class="eyebrow-badge">Módulos 4, 6 y 10 • Simulador del Estudiante, Editor y Exportador</span>
+            <h2 id="preview-heading">👁️ Vista Previa Interactiva, Editor y Exportación</h2>
+            <p class="text-muted">Probá la actividad como estudiante, editá cualquier pregunta o texto, y descargala para Moodle.</p>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" class="btn btn-outline" id="btn-toggle-editor">
+              ✏️ Editar Actividad / Preguntas
+            </button>
+          </div>
+        </div>
+
+        <div id="activity-editor-panel" class="panel-card" style="display:none;border:2px solid #2563eb;">
+          <div class="panel-card-header">
+            <div>
+              <h3>✏️ Editor Visual de la Actividad</h3>
+              <p class="text-muted">Modificá el título, asignatura, etiquetas, desarrollo, consignas, preguntas y retroalimentación. Todos los cambios se guardan en tu biblioteca.</p>
+            </div>
+          </div>
+          <form id="activity-edit-form" class="form-stack">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="edit-title">Título de la actividad *</label>
+                <input type="text" id="edit-title" required />
+              </div>
+              <div class="form-group">
+                <label for="edit-subject">Asignatura / Carpeta *</label>
+                <input type="text" id="edit-subject" required />
+              </div>
+              <div class="form-group">
+                <label for="edit-description">Descripción breve *</label>
+                <input type="text" id="edit-description" required />
+              </div>
+              <div class="form-group">
+                <label for="edit-tags">Etiquetas de búsqueda</label>
+                <input type="text" id="edit-tags" placeholder="Ej.: biología, unidad 1, evaluación" />
+              </div>
+              <div class="form-group form-col-span-2">
+                <label for="edit-instructions">Instrucciones para estudiantes *</label>
+                <textarea id="edit-instructions" rows="2" required></textarea>
+              </div>
+              <div class="form-group form-col-span-2">
+                <label for="edit-development">Desarrollo del contenido / Narrativa / Caso práctico *</label>
+                <textarea id="edit-development" rows="4" required></textarea>
+              </div>
+              <div class="form-group form-col-span-2">
+                <label for="edit-recommendations">Recomendaciones pedagógicas para el docente</label>
+                <textarea id="edit-recommendations" rows="2"></textarea>
+              </div>
+            </div>
+
+            <h4 style="margin-top:12px;">Preguntas y Retroalimentación Editable</h4>
+            <div id="edit-questions-list" class="form-stack"></div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="btn-cancel-editor">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-activity-edits">
+                💾 Guardar Cambios en la Actividad
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="preview-container"></div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 5: BIBLIOTECA PERSONAL COMPLETA (Módulo 5)                 -->
+      <!-- ================================================================ -->
+      <section id="view-library" class="view-section" aria-labelledby="library-heading">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <span class="eyebrow-badge">Módulo 5 • Repositorio Personal del Docente</span>
+            <h2 id="library-heading">📚 Biblioteca Personal de Actividades</h2>
+            <p class="text-muted">Organizá por asignatura, buscá, editá, duplicá y volvé a descargar todas tus actividades en Moodle XML, GIFT, SCORM o H5P.</p>
+          </div>
+          <button type="button" class="btn btn-primary" data-goto-view="generator">
+            ✨ Crear Actividad
+          </button>
+        </div>
+
+        <div class="panel-card">
+          <div class="library-filters" style="flex-wrap:wrap;">
+            <input type="search" id="library-search-input" placeholder="🔍 Buscar por título, tema, asignatura o etiqueta..." aria-label="Buscar actividades en la biblioteca" style="min-width:220px;" />
+
+            <select id="library-subject-filter" aria-label="Filtrar por asignatura" style="padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;">
+              <option value="Todas">📁 Todas las asignaturas</option>
+            </select>
+
+            <select id="library-type-filter" aria-label="Filtrar por tipo de actividad" style="padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;">
+              <option value="Todos">🧩 Todos los tipos</option>
+              <option value="Opción múltiple">Opción múltiple</option>
+              <option value="Verdadero o falso">Verdadero o falso</option>
+              <option value="Completar espacios">Completar espacios</option>
+              <option value="Relacionar columnas">Relacionar columnas</option>
+              <option value="Ordenar secuencias">Ordenar secuencias</option>
+              <option value="Preguntas abiertas">Preguntas abiertas</option>
+              <option value="Cuestionarios">Cuestionarios</option>
+              <option value="Crucigramas">Crucigramas</option>
+              <option value="Sopa de letras">Sopa de letras</option>
+              <option value="Casos prácticos">Casos prácticos</option>
+              <option value="Actividades de reflexión">Actividades de reflexión</option>
+              <option value="Gamificación">Gamificación</option>
+            </select>
+
+            <label class="checkbox-inline">
+              <input type="checkbox" id="library-only-favorites" />
+              <span>Solo favoritos ⭐</span>
+            </label>
+          </div>
+
+          <div id="library-activities-list" class="activity-list"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 6: TUTORIALES Y PEDAGOGÍA (Módulos 1, 4 y 6)               -->
+      <!-- ================================================================ -->
+      <section id="view-tutorials" class="view-section" aria-labelledby="tutorials-heading">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow-badge">Módulos 4 y 6 • Guía Docente</span>
+            <h2 id="tutorials-heading">💡 Tutoriales de Importación en Moodle y Diseño Pedagógico</h2>
+            <p class="text-muted">Todo lo que necesitás saber para llevar tus recursos a tu aula virtual Moodle y aprovechar el enfoque pedagógico de la plataforma.</p>
+          </div>
+        </div>
+
+        <div class="tutorials-grid">
+          <article class="panel-card">
+            <h3>1. Importar Banco de Preguntas (Moodle XML y GIFT)</h3>
+            <p>Ideal para armar cuestionarios nativos de Moodle que se mezclan al azar y califican en el libro de calificaciones.</p>
+            <ul class="clean-list">
+              <li><strong>Moodle XML:</strong> Conserva formato enriquecido, retroalimentación general, retroalimentación por opción y puntuaciones exactas.</li>
+              <li><strong>GIFT:</strong> Formato liviano en texto plano, ideal para edición rápida y bancos grandes de preguntas.</li>
+            </ul>
+          </article>
+          <article class="panel-card">
+            <h3>2. Importar Paquetes SCORM 1.2 y SCORM 2004</h3>
+            <p>Ideal cuando querés incluir la lectura teórica, las instrucciones, las actividades interactivas y la evaluación en una sola ventana autónoma.</p>
+            <ul class="clean-list">
+              <li>Incluye archivo <code>imsmanifest.xml</code> estandarizado.</li>
+              <li>Se comunica automáticamente con la API de Moodle para guardar el puntaje (0 a 100) y el estado <em>Completado / Aprobado</em>.</li>
+            </ul>
+          </article>
+          <article class="panel-card">
+            <h3>3. Importar paquetes H5P reales (.h5p)</h3>
+            <p>Ideal para actividades visuales modernas integradas con el Banco de Contenido de Moodle.</p>
+            <ul class="clean-list">
+              <li>Contiene el manifiesto <code>h5p.json</code> con declaración de bibliotecas oficiales (<code>H5P.QuestionSet</code>, <code>H5P.MultiChoice</code>, <code>H5P.TrueFalse</code>, <code>H5P.Blanks</code>, <code>H5P.DragText</code>) y la carpeta <code>content/content.json</code>.</li>
+            </ul>
+          </article>
+          <article class="panel-card">
+            <h3>4. Marco Pedagógico: Bloom, Aprendizaje Activo y DUA</h3>
+            <p>Todas las actividades generadas en MoodleAI Creator incorporan:</p>
+            <ul class="clean-list">
+              <li><strong>Taxonomía de Bloom:</strong> Explicita los procesos cognitivos trabajados (Recordar, Comprender, Aplicar, Analizar, Evaluar, Crear).</li>
+              <li><strong>Evaluación Formativa:</strong> Cada pregunta explica tanto por qué una opción es correcta como qué concepto revisar si es incorrecta.</li>
+              <li><strong>Accesibilidad e Inclusión (DUA):</strong> Enunciados claros, sin ambigüedades y con estructura visual limpia.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- VISTA 7: USUARIOS (SUPABASE AUTH) Y PLANES CON MERCADO PAGO (ARS)-->
+      <!-- ================================================================ -->
+      <section id="view-profile" class="view-section" aria-labelledby="profile-heading">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow-badge">Módulo 7 • Supabase Auth + Pasarela Mercado Pago en ARS</span>
+            <h2 id="profile-heading">💳 Planes en Pesos Argentinos, Mercado Pago y Cuenta Docente</h2>
+            <p class="text-muted">Autenticación con proyecto exclusivo de Supabase y suscripciones en Pesos Argentinos ($0, $25.000 y $50.000 ARS/mes) vía Mercado Pago.</p>
+          </div>
+        </div>
+
+        <!-- Bloque de Autenticación (Supabase Auth + Respaldo Local) -->
+        <div class="panel-card">
+          <div class="panel-card-header" style="flex-wrap:wrap;">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h3>🔐 Autenticación de Usuarios (Supabase Auth)</h3>
+                <span id="supabase-status-badge" class="badge badge-subject">Verificando conexión Supabase...</span>
+              </div>
+              <p class="text-muted" style="margin-top:4px;">Sesión activa como: <strong id="auth-current-email">docente@moodleai.edu.ar</strong></p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-sm btn-outline" id="btn-show-login">Iniciar sesión</button>
+              <button type="button" class="btn btn-sm btn-primary" id="btn-show-register">+ Registrar nuevo docente</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btn-logout">Cerrar sesión</button>
+            </div>
+          </div>
+
+          <form id="auth-login-form" class="form-grid" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0;">
+            <div class="form-group">
+              <label for="login-email">Correo electrónico *</label>
+              <input type="email" id="login-email" required placeholder="docente@moodleai.edu.ar" />
+            </div>
+            <div class="form-group">
+              <label for="login-password">Contraseña *</label>
+              <input type="password" id="login-password" required placeholder="••••••••" />
+            </div>
+            <div class="form-actions form-col-span-2">
+              <button type="submit" class="btn btn-primary">Ingresar con mi cuenta</button>
+            </div>
+          </form>
+
+          <form id="auth-register-form" class="form-grid" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0;">
+            <div class="form-group">
+              <label for="reg-name">Nombre y Apellido del Docente *</label>
+              <input type="text" id="reg-name" required placeholder="Ej.: Prof. Laura Martínez" />
+            </div>
+            <div class="form-group">
+              <label for="reg-email">Correo electrónico *</label>
+              <input type="email" id="reg-email" required placeholder="laura@instituto.edu.ar" />
+            </div>
+            <div class="form-group">
+              <label for="reg-password">Contraseña (mínimo 6 caracteres) *</label>
+              <input type="password" id="reg-password" minlength="6" required placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div class="form-group">
+              <label for="reg-institution">Institución educativa</label>
+              <input type="text" id="reg-institution" placeholder="Nombre del colegio o universidad" />
+            </div>
+            <div class="form-group">
+              <label for="reg-level">Nivel educativo</label>
+              <select id="reg-level">
+                <option value="Primaria">Primaria</option>
+                <option value="Secundaria" selected>Secundaria</option>
+                <option value="Universidad">Universidad</option>
+                <option value="Capacitación">Capacitación</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reg-specialty">Asignatura o especialidad</label>
+              <input type="text" id="reg-specialty" placeholder="Ej.: Matemática y Física" />
+            </div>
+            <div class="form-actions form-col-span-2">
+              <button type="submit" class="btn btn-primary">Crear Cuenta Docente Gratuita ($0 ARS)</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="dashboard-columns">
+          <!-- Columna Izquierda: Planes en Pesos Argentinos y Pasarela Mercado Pago -->
+          <div class="panel-card">
+            <h3>💳 Planes en Pesos Argentinos (ARS) con Mercado Pago</h3>
+            <p class="text-muted">Aboná en pesos argentinos con las 2 modalidades de Mercado Pago (Checkout Pro Dinámico o Link de Suscripción):</p>
+            <div id="plans-list-container" class="plans-stack"></div>
+
+            <h4 style="margin-top:20px;font-size:0.95rem;">🧾 Comprobantes de Pago Mercado Pago (ARS)</h4>
+            <div id="payments-history-list" class="activity-list" style="margin-top:10px;"></div>
+          </div>
+
+          <!-- Columna Derecha: Perfil Docente e Historial de Uso -->
+          <div class="dashboard-side-stack">
+            <div class="panel-card">
+              <h3>👩‍🏫 Datos profesionales del docente</h3>
+              <form id="profile-form" class="form-stack">
+                <div class="form-group">
+                  <label for="prof-name">Nombre y Apellido *</label>
+                  <input type="text" id="prof-name" name="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="prof-email">Correo electrónico (Usuario)</label>
+                  <input type="email" id="prof-email" disabled />
+                </div>
+                <div class="form-group">
+                  <label for="prof-institution">Institución educativa</label>
+                  <input type="text" id="prof-institution" name="institution" placeholder="Nombre de la escuela, instituto o universidad" />
+                </div>
+                <div class="form-group">
+                  <label for="prof-level">Nivel educativo principal</label>
+                  <input type="text" id="prof-level" name="education_level" placeholder="Ej.: Secundaria y Superior" />
+                </div>
+                <div class="form-group">
+                  <label for="prof-specialty">Asignaturas o especialidad</label>
+                  <input type="text" id="prof-specialty" name="subject_specialty" placeholder="Ej.: Ciencias Naturales, Tecnología Educativa, Accesibilidad" />
+                </div>
+                <div class="form-group">
+                  <label for="prof-bio">Presentación / Enfoque pedagógico</label>
+                  <textarea id="prof-bio" name="bio" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary" id="btn-save-profile">
+                    💾 Guardar cambios del perfil
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="panel-card">
+              <h3>📜 Historial de Uso Reciente</h3>
+              <p class="text-muted">Registro auditable de generaciones, exportaciones y pagos:</p>
+              <div id="usage-history-list" class="activity-list" style="margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

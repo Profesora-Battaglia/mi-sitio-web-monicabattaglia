@@ -1,0 +1,24 @@
+{
+  "name": "moodle-ai-creator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma SaaS EdTech para transformar contenidos educativos en actividades interactivas, evaluaciones y paquetes Moodle XML, GIFT, SCORM y H5P con IA.",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js",
+    "db:init": "node server/db/init.js",
+    "build:web": "node server/build-web.js",
+    "test:stage2": "node server/tests/test-stage2-db.js",
+    "test:stage3": "node server/tests/test-stage3-server.js",
+    "test:stage4": "node server/tests/test-stage4-generator.js",
+    "test:stage5": "node server/tests/test-stage5-moodle-native.js",
+    "test:stage6": "node server/tests/test-stage6-scorm.js",
+    "test:stage7": "node server/tests/test-stage7-h5p.js",
+    "test:stage8": "node server/tests/test-stage8-9-users-library-plans.js",
+    "test:all": "node server/tests/test-stage2-db.js && node server/tests/test-stage3-server.js && node server/tests/test-stage4-generator.js && node server/tests/test-stage5-moodle-native.js && node server/tests/test-stage6-scorm.js && node server/tests/test-stage7-h5p.js && node server/tests/test-stage8-9-users-library-plans.js"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}

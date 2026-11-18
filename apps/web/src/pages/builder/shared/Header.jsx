@@ -62,12 +62,26 @@ export default function Header() {
 					hasDropdown: false,
 				},
 				{
+					id: 'moodleAI',
+					href: '/moodle-ai-creator-app',
+					text: '🎓 MoodleAI Creator',
+					isHidden: false,
+					hasDropdown: false,
+				},
+				{
 					id: 'zi32Qd',
 					href: '/recursos-para-docentes',
 					text: 'Recursos Gratis',
 					isHidden: false,
 					hasDropdown: true,
 					subItems: [
+						{
+							id: 'rec-moodleai',
+							href: '/moodle-ai-creator-app',
+							text: '🎓 MoodleAI Creator (Actividades, SCORM y H5P)',
+							isHidden: false,
+							hasDropdown: false,
+						},
 						{
 							id: 'rec-all',
 							href: '/recursos-para-docentes',

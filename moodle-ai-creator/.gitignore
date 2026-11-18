@@ -1,0 +1,22 @@
+# Variables de entorno y secretos (NUNCA subir a GitHub)
+.env
+.env.local
+.env.*.local
+config.local.js
+public/config.local.js
+**/config.local.js
+
+# Dependencias
+node_modules/
+
+# Base de datos local SQLite
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
+data/test-*.sqlite*
+
+# Archivos de compilación y temporales
+dist/
+*.log
+.DS_Store
+Thumbs.db

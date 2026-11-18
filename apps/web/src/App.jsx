@@ -16,6 +16,7 @@ import PoliticasDePrivacidadPage_system_zJIEZB from '@/pages/builder/politicas-d
 import IaEnElAula2026AcuerdosEvaluacionPage_system_zKf4dd from '@/pages/builder/ia-en-el-aula-2026-acuerdos-evaluacion/IaEnElAula2026AcuerdosEvaluacionPage';
 import SistemaDeGestionDeInscripcionesAMesasDeExamenYActasDigitalesPage_system_zUErCn from '@/pages/builder/sistema-de-gestion-de-inscripciones-a-mesas-de-examen-y-actas-digitales/SistemaDeGestionDeInscripcionesAMesasDeExamenYActasDigitalesPage';
 import LibroDeTemasDigitalPage from '@/pages/builder/libro-de-temas-digital/LibroDeTemasDigitalPage';
+import MoodleAiCreatorPage from '@/pages/builder/moodle-ai-creator/MoodleAiCreatorPage';
 import BlogcomoCrearPdfAccesibleDocentesPage_system_zYPleC from '@/pages/builder/blogcomo-crear-pdf-accesible-docentes/BlogcomoCrearPdfAccesibleDocentesPage';
 import EvaluadorDeAccesibilidadDeMaterialesDidacticosPage_system_zcDbjO from '@/pages/builder/evaluador-de-accesibilidad-de-materiales-didacticos/EvaluadorDeAccesibilidadDeMaterialesDidacticosPage';
 import HttpsclaseiaxpressvercelappPage_system_zeg05 from '@/pages/builder/httpsclaseiaxpressvercelapp/HttpsclaseiaxpressvercelappPage';
@@ -82,6 +83,10 @@ function App() {
 						<Route
 							path={'/libro-de-temas-digital'}
 							element={<LibroDeTemasDigitalPage />}
+						/>
+						<Route
+							path={'/moodle-ai-creator-app'}
+							element={<MoodleAiCreatorPage />}
 						/>
 						<Route
 							path={'/blogcomo-crear-pdf-accesible-docentes'}
